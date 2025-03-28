@@ -4,3 +4,6 @@
 [submodule "BRTLibrary"]
 	path = BRTLibrary
 	url = https://github.com/GrupoDiana/BRTLibrary.git
+[submodule "example_2_basic_spatialisation_OF/addons/ofxBRT/libs/brt"]
+	path = example_2_basic_spatialisation_OF/addons/ofxBRT/libs/brt
+	url = https://github.com/GrupoDiana/BRTLibrary.git
