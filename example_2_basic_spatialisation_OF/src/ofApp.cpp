@@ -211,11 +211,7 @@ void ofApp::AudioSetup() {
 	outputParameters.sampleRate = SAMPLERATE;
 	outputParameters.bufferSize = iBufferSize;
 
-	std::cout << "this en setup(): " << this << std::endl;
-	std::cout << "soundStream antes de setOutListener: " << &soundStream << std::endl;
 	outputParameters.setOutListener(this);
-
-	
 
 	try {
 		soundStream.setup(outputParameters);
@@ -265,8 +261,8 @@ void ofApp::audioOut(ofSoundBuffer & buffer) {
 	// Setting the output buffer as float
 	std::vector<float> & bufferData = buffer.getBuffer();
 
-	// Obtén un puntero al primer elemento del vector
-	float * floatOutputBuffer = &bufferData[0]; // O también bufferData.data()
+	//Pointer to the first element of the vector
+	float * floatOutputBuffer = &bufferData[0]; 
 
 	//Overflow/underflow
 	if (buffer.getNumFrames() == 0) {
