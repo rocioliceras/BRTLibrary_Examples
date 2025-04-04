@@ -82,7 +82,7 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);src;addons\ofxBRT\libs;addons\ofxBRT\libs\brt;addons\ofxBRT\libs\brt\include;addons\ofxBRT\libs\brt\include\third_party_libraries\boost_circular_buffer;addons\ofxBRT\libs\brt\include\third_party_libraries\eigen;addons\ofxBRT\libs\brt\include\third_party_libraries\libmysofa;addons\ofxBRT\src;addons\ofxAudioFile\libs;addons\ofxAudioFile\src;C:\Repos\of_v20250319_vs_64_release\apps\BRTLibrary_Examples\example_2_basic_spatialisation_OF</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);src;addons\ofxBRT\libs;addons\ofxBRT\libs\brt;addons\ofxBRT\libs\brt\include;addons\ofxBRT\libs\brt\include\third_party_libraries\boost_circular_buffer;addons\ofxBRT\libs\brt\include\third_party_libraries\eigen;addons\ofxBRT\libs\brt\include\third_party_libraries\libmysofa;addons\ofxBRT\libs\brt\include\third_party_libraries\libmysofa\include;addons\ofxBRT\src;addons\ofxAudioFile\libs;addons\ofxAudioFile\src</AdditionalIncludeDirectories>
       <CompileAs>CompileAsCpp</CompileAs>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ObjectFileName>$(IntDir)\Build\%(RelativeDir)\$(Configuration)\</ObjectFileName>
@@ -226,11 +226,17 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="addons\ofxAudioFile\src\ofxAudioFile.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ofApp.cpp" />
     <ClCompile Include="addons\ofxBRT\libs\brt\test\test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="addons\ofxAudioFile\libs\dr_flac.h" />
+    <ClInclude Include="addons\ofxAudioFile\libs\dr_mp3.h" />
+    <ClInclude Include="addons\ofxAudioFile\libs\dr_wav.h" />
+    <ClInclude Include="addons\ofxAudioFile\libs\stb_vorbis.h" />
+    <ClInclude Include="addons\ofxAudioFile\src\ofxAudioFile.h" />
     <ClInclude Include="AppUtils.hpp" />
     <ClInclude Include="ConfigurationA.hpp" />
     <ClInclude Include="ConfigurationB.hpp" />

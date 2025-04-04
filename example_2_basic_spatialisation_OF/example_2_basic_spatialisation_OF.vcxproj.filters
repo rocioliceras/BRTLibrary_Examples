@@ -10,6 +10,9 @@
     <ClCompile Include="addons\ofxBRT\libs\brt\test\test.cpp">
       <Filter>local_addons\ofxBRT\libs\brt\test</Filter>
     </ClCompile>
+    <ClCompile Include="addons\ofxAudioFile\src\ofxAudioFile.cpp">
+      <Filter>local_addons\ofxAudioFile\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -329,6 +332,18 @@
     </Filter>
     <Filter Include="local_addons\ofxBRT\libs\brt\test">
       <UniqueIdentifier>{F6F2CF72--50A-6-42-E7-8-388-5CCD238BD3F9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="local_addons\ofxAudioFile">
+      <UniqueIdentifier>{a950b1c0-6e9f-41f4-b3be-92a81d74e458}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="local_addons\ofxAudioFile\src">
+      <UniqueIdentifier>{6053f47e-1df8-4e45-93d6-339dd4cbc710}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="local_addons\ofxAudioFile\libs">
+      <UniqueIdentifier>{e0159a81-2b32-4058-8715-a945df03092f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resources">
+      <UniqueIdentifier>{83d10c8e-96db-4a28-bb51-81408b95201b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -3547,6 +3562,21 @@
     </ClInclude>
     <ClInclude Include="ConfigurationC.hpp">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="addons\ofxAudioFile\libs\dr_flac.h">
+      <Filter>local_addons\ofxAudioFile\libs</Filter>
+    </ClInclude>
+    <ClInclude Include="addons\ofxAudioFile\libs\dr_mp3.h">
+      <Filter>local_addons\ofxAudioFile\libs</Filter>
+    </ClInclude>
+    <ClInclude Include="addons\ofxAudioFile\libs\dr_wav.h">
+      <Filter>local_addons\ofxAudioFile\libs</Filter>
+    </ClInclude>
+    <ClInclude Include="addons\ofxAudioFile\libs\stb_vorbis.h">
+      <Filter>local_addons\ofxAudioFile\libs</Filter>
+    </ClInclude>
+    <ClInclude Include="addons\ofxAudioFile\src\ofxAudioFile.h">
+      <Filter>local_addons\ofxAudioFile\src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
