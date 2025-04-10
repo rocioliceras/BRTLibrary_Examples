@@ -4,15 +4,14 @@
 
 #define SAMPLERATE 44100
 
-#define SOURCE1_FILEPATH "../resources/speech.wav"
-#define SOURCE2_FILEPATH "../resources/steps.wav"
+#define SOURCE1_FILEPATH "../resources/stereo_test.wav"
 #define HRTFRESAMPLINGSTEP 15
 
 #define SOURCE1_INITIAL_AZIMUTH 90
 #define SOURCE1_INITIAL_ELEVATION 0
 #define SOURCE1_INITIAL_DISTANCE 2
 
-#define SOURCE2_INITIAL_AZIMUTH 0
+#define SOURCE2_INITIAL_AZIMUTH -90
 #define SOURCE2_INITIAL_ELEVATION 0
 #define SOURCE2_INITIAL_DISTANCE 2
 #define SOURCE2_INITIAL_SPEED 0.001
@@ -81,7 +80,7 @@ public:
 	void audioOut(ofSoundBuffer & buffer);
 	void audioProcess(Common::CEarPair<CMonoBuffer<float>> & bufferOutput, int uiBufferSize);
 	void FillBuffer(CMonoBuffer<float> & output, unsigned int & position, unsigned int & endFrame, std::vector<float> & samplesVector);
-	void LoadWav(std::vector<float> & samplesVector, const char * stringIn);
+	void LoadWav(std::vector<float> & samplesVector1, std::vector<float> & samplesVector2, const char * stringIn);
 	std::shared_ptr<BRTSourceModel::CSourceSimpleModel> CreateSimpleSoundSource(std::string _soundSourceID);
 	void MoveSource_CircularHorizontalPath();
 	Common::CVector3 Spherical2Cartesians(float azimuth, float elevation, float radius);

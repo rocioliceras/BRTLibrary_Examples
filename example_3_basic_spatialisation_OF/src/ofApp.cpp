@@ -60,18 +60,18 @@ void ofApp::setup() {
 	/////////////////////
 	// Create Sources
 	/////////////////////
-	source1BRT = CreateSimpleSoundSource("speech");
-	source2BRT = CreateSimpleSoundSource("steps");
+	source1BRT = CreateSimpleSoundSource("ChanelL");
+	source2BRT = CreateSimpleSoundSource("ChanelR");
 
 	if (selection == 'A') {
-		configurationA.ConnectSoundSource(&brtManager, "speech");
-		configurationA.ConnectSoundSource(&brtManager, "steps");
+		configurationA.ConnectSoundSource(&brtManager, "ChanelL");
+		configurationA.ConnectSoundSource(&brtManager, "ChanelR");
 	} else if (selection == 'B') {
-		configurationB.ConnectSoundSource(&brtManager, "speech");
-		configurationB.ConnectSoundSource(&brtManager, "steps");
+		configurationB.ConnectSoundSource(&brtManager, "ChanelL");
+		configurationB.ConnectSoundSource(&brtManager, "ChanelR");
 	} else if (selection == 'C') {
-		configurationC.ConnectSoundSource(&brtManager, "speech");
-		configurationC.ConnectSoundSource(&brtManager, "steps");
+		configurationC.ConnectSoundSource(&brtManager, "ChanelL");
+		configurationC.ConnectSoundSource(&brtManager, "ChanelR");
 	}
 
 	/////////////////////
@@ -81,19 +81,19 @@ void ofApp::setup() {
 	source1.SetPosition(Spherical2Cartesians(SOURCE1_INITIAL_AZIMUTH, SOURCE1_INITIAL_ELEVATION, SOURCE1_INITIAL_DISTANCE));
 	source1BRT->SetSourceTransform(source1);
 
-	source2Azimuth = SOURCE2_INITIAL_AZIMUTH;
+	/*source2Azimuth = SOURCE2_INITIAL_AZIMUTH;
 	source2Elevation = SOURCE2_INITIAL_ELEVATION;
-	source2Distance = SOURCE2_INITIAL_DISTANCE;
+	source2Distance = SOURCE2_INITIAL_DISTANCE;*/
 	Common::CTransform source2 = Common::CTransform();
-	source2.SetPosition(Spherical2Cartesians(source2Azimuth, source2Elevation, source2Distance));
+	source2.SetPosition(Spherical2Cartesians(SOURCE2_INITIAL_AZIMUTH, SOURCE2_INITIAL_ELEVATION, SOURCE2_INITIAL_DISTANCE));
 	source2BRT->SetSourceTransform(source2); // Set source2 position
-	showSource2PositionCounter = 0;
+	//showSource2PositionCounter = 0;
 
 	// /////////////////////
 	// Load Wav Files
 	/////////////////////
-	LoadWav(samplesVectorSource1, SOURCE1_FILEPATH); // Loading .wav file
-	LoadWav(samplesVectorSource2, SOURCE2_FILEPATH); // Loading .wav file
+	LoadWav(samplesVectorSource1, samplesVectorSource2, SOURCE1_FILEPATH); // Loading .wav file
+	//LoadWav(samplesVectorSource2, SOURCE2_FILEPATH); // Loading .wav file
 
 	/////////////////////
 	// Start AUDIO Render
@@ -267,8 +267,8 @@ void ofApp::audioOut(ofSoundBuffer & buffer) {
 		floatOutputBuffer = &floatOutputBuffer[1]; // Updating pointer to next buffer position
 	}
 
-	MoveSource_CircularHorizontalPath();
-	ShowSource2Position();
+	//MoveSource_CircularHorizontalPath();
+	//ShowSource2Position();
 }
 
 /// Function to process audio
@@ -306,7 +306,7 @@ void ofApp::FillBuffer(CMonoBuffer<float> & output, unsigned int & position, uns
 	}
 }
 
-void ofApp::LoadWav(std::vector<float> & samplesVector, const char * stringIn) {
+void ofApp::LoadWav(std::vector<float> & samplesVector1, std::vector<float> & samplesVector2, const char * stringIn) {
 	ofxAudioFile audioFile;
 	audioFile.load(stringIn);
 
@@ -320,12 +320,16 @@ void ofApp::LoadWav(std::vector<float> & samplesVector, const char * stringIn) {
 	size_t numSamples = audioFile.length();
 
 	// Clear the vector before filling it
-	samplesVector.clear();
-	samplesVector.reserve(numSamples); // Reserve memory to avoid reallocations
+	samplesVector1.clear();
+	samplesVector1.reserve(numSamples); // Reserve memory to avoid reallocations
+
+	samplesVector2.clear();
+	samplesVector2.reserve(numSamples); // Reserve memory to avoid reallocations
 
 	// Extract samples (only from the left channel if stereo)
 	for (size_t i = 0; i < numSamples; i++) {
-		samplesVector.push_back(audioFile.sample(i, 0)); // 0 = left channel
+		samplesVector1.push_back(audioFile.sample(i, 0)); // 0 = left channel
+		samplesVector2.push_back(audioFile.sample(i, 1)); 
 	}
 }
 
