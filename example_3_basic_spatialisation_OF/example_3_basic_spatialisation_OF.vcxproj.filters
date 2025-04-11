@@ -3582,4 +3582,9 @@
   <ItemGroup>
     <ResourceCompile Include="icon.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\hrtf.sofa">
+      <Filter>resources</Filter>
+    </None>
+  </ItemGroup>
 </Project>

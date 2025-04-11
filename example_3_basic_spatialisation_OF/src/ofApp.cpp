@@ -329,7 +329,7 @@ void ofApp::LoadWav(std::vector<float> & samplesVector1, std::vector<float> & sa
 	// Extract samples (only from the left channel if stereo)
 	for (size_t i = 0; i < numSamples; i++) {
 		samplesVector1.push_back(audioFile.sample(i, 0)); // 0 = left channel
-		samplesVector2.push_back(audioFile.sample(i, 1)); 
+		samplesVector2.push_back(audioFile.sample(i, 1));
 	}
 }
 
