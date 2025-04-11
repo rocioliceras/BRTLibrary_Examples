@@ -10,3 +10,6 @@
 [submodule "example_3_basic_spatialisation_OF/addons/ofxAudioFile"]
 	path = example_3_basic_spatialisation_OF/addons/ofxAudioFile
 	url = https://github.com/npisanti/ofxAudioFile.git
+[submodule "example_3_basic_spatialisation_OF/addons/ofxBRT/libs/brt"]
+	path = example_3_basic_spatialisation_OF/addons/ofxBRT/libs/brt
+	url = https://github.com/GrupoDiana/BRTLibrary.git
