@@ -80,16 +80,10 @@ class ofApp : public ofBaseApp {
 		void AudioSetup();
 		ofSoundDevice ShowSelectAudioDeviceMenu();
 		char ShowConfigurationMenu();
-
 		void audioOut(ofSoundBuffer & buffer);
 		void audioProcess(Common::CEarPair<CMonoBuffer<float>> & bufferOutput, int uiBufferSize);
-		void FillBuffer(CMonoBuffer<float> & output, unsigned int & position, unsigned int & endFrame, std::vector<float> & samplesVector);
-		void LoadWav(std::vector<float> & samplesVector, const char * stringIn);
-		std::shared_ptr<BRTSourceModel::CSourceSimpleModel> CreateSimpleSoundSource(std::string _soundSourceID);
-		void MoveSource_CircularHorizontalPath();
-		Common::CVector3 Spherical2Cartesians(float azimuth, float elevation, float radius);
-		void ShowSource2Position();
-		float rad2deg(float rad);
+
+		
 		
 
 
@@ -99,6 +93,13 @@ private:
 			HANDLE hThread = GetCurrentThread();
 			SetThreadPriority(hThread, THREAD_PRIORITY_TIME_CRITICAL);
 		}
+		void FillBuffer(CMonoBuffer<float> & output, unsigned int & position, unsigned int & endFrame, std::vector<float> & samplesVector);
+		void LoadWav(std::vector<float> & samplesVector, const char * stringIn);
+		std::shared_ptr<BRTSourceModel::CSourceSimpleModel> CreateSimpleSoundSource(std::string _soundSourceID);
+		void MoveSource_CircularHorizontalPath();
+		Common::CVector3 Spherical2Cartesians(float azimuth, float elevation, float radius);
+		void ShowSource2Position();
+		float rad2deg(float rad);
 		
 };
 

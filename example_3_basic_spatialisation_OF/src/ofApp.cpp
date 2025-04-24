@@ -14,10 +14,10 @@ void ofApp::setup() {
 	BRT_ERRORHANDLER.SetVerbosityMode(VERBOSITYMODE_ERRORSANDWARNINGS);
 	BRT_ERRORHANDLER.SetErrorLogStream(&std::cout, true);
 
-	// /// Show introduction message
+	/// Show introduction message
 	ShowIntroduction();
 
-	// /// Select Buffer Size
+	/// Select Buffer Size
 	std::cout << "Insert wished buffer size (256, 512, 1024, 2048, 4096...)\n(2048 at least recommended for linux)\t: ";
 	std::cin >> iBufferSize;
 	std::cin.ignore();
@@ -81,19 +81,14 @@ void ofApp::setup() {
 	source1.SetPosition(Spherical2Cartesians(SOURCE1_INITIAL_AZIMUTH, SOURCE1_INITIAL_ELEVATION, SOURCE1_INITIAL_DISTANCE));
 	source1BRT->SetSourceTransform(source1);
 
-	/*source2Azimuth = SOURCE2_INITIAL_AZIMUTH;
-	source2Elevation = SOURCE2_INITIAL_ELEVATION;
-	source2Distance = SOURCE2_INITIAL_DISTANCE;*/
 	Common::CTransform source2 = Common::CTransform();
 	source2.SetPosition(Spherical2Cartesians(SOURCE2_INITIAL_AZIMUTH, SOURCE2_INITIAL_ELEVATION, SOURCE2_INITIAL_DISTANCE));
 	source2BRT->SetSourceTransform(source2); // Set source2 position
-	//showSource2PositionCounter = 0;
 
 	// /////////////////////
 	// Load Wav Files
 	/////////////////////
-	LoadWav(samplesVectorSource1, samplesVectorSource2, SOURCE1_FILEPATH); // Loading .wav file
-	//LoadWav(samplesVectorSource2, SOURCE2_FILEPATH); // Loading .wav file
+	LoadWav(samplesVectorSource1, samplesVectorSource2, SOURCE_FILEPATH); // Loading .wav file
 
 	/////////////////////
 	// Start AUDIO Render
@@ -182,9 +177,8 @@ void ofApp::AudioSetup() {
 	ofSoundStreamSettings outputParameters;
 	outputParameters.numOutputChannels = 2;
 
-	//outputParameters.getOutDevice();
 	ofSoundDevice device = ShowSelectAudioDeviceMenu();
-	outputParameters.setOutDevice(device); //Aqui he elegido mis auriculares porque el por defecto no se escuchaba
+	outputParameters.setOutDevice(device); 
 
 	// Setting real-time audio output.
 	setRealTimePriority();
@@ -266,9 +260,6 @@ void ofApp::audioOut(ofSoundBuffer & buffer) {
 		floatOutputBuffer[0] = *it; // Setting of value in actual buffer position
 		floatOutputBuffer = &floatOutputBuffer[1]; // Updating pointer to next buffer position
 	}
-
-	//MoveSource_CircularHorizontalPath();
-	//ShowSource2Position();
 }
 
 /// Function to process audio
@@ -326,10 +317,10 @@ void ofApp::LoadWav(std::vector<float> & samplesVector1, std::vector<float> & sa
 	samplesVector2.clear();
 	samplesVector2.reserve(numSamples); // Reserve memory to avoid reallocations
 
-	// Extract samples (only from the left channel if stereo)
+	// Extract samples
 	for (size_t i = 0; i < numSamples; i++) {
 		samplesVector1.push_back(audioFile.sample(i, 0)); // 0 = left channel
-		samplesVector2.push_back(audioFile.sample(i, 1));
+		samplesVector2.push_back(audioFile.sample(i, 1)); // 1 = right channel
 	}
 }
 
@@ -344,10 +335,9 @@ void ofApp::ShowIntroduction() {
 	std::cout << "BRT is a modular library designed to provide highly configurable rendering adaptable to various needs.\n";
 	std::cout << "Thanks to its flexible structure, it allows multiple modules to be interconnected to optimize performance according to the user's specific requirements.\n\n";
 	std::cout << "This example demonstrates different ways to instantiate and configure the modules, although many more possibilities are not explored here, such as rendering with multiple listeners.\n\n";
-	std::cout << "The purpose of this example is to serve as an introductory guide to using the library. You are free to use, copy, or modify the code as needed.\n\n";
+	std::cout << "The purpose of this example is to show how to work with stereo audio. You are free to use, copy, or modify the code as needed.\n\n";
 
-	std::cout << "As a demonstration, in this example, you will hear a woman's voice coming from your left while footsteps move around you simultaneously.\n";
-	std::cout << "The screen will display the position of these footsteps in real-time.\n\n";
+	std::cout << "As a demonstration, in this example, you will hear a man indicating if the sound comes from the righ side, the left side or both.\n";
 
 	std::cout << "============================================\n\n";
 }
@@ -380,17 +370,6 @@ char ofApp::ShowConfigurationMenu() {
 ///////////////////////
 // SOURCE MOVEMENT
 ///////////////////////
-void ofApp::MoveSource_CircularHorizontalPath() {
-
-	Common::CVector3 newPosition;
-	source2Azimuth += SOURCE2_INITIAL_SPEED;
-	if (source2Azimuth > 2 * M_PI) source2Azimuth = 0;
-	newPosition = Spherical2Cartesians(source2Azimuth, source2Elevation, source2Distance);
-
-	Common::CTransform sourcePosition = source2BRT->GetSourceTransform();
-	sourcePosition.SetPosition(newPosition);
-	source2BRT->SetSourceTransform(sourcePosition);
-}
 
 Common::CVector3 ofApp::Spherical2Cartesians(float azimuth, float elevation, float radius) {
 
@@ -405,19 +384,6 @@ Common::CVector3 ofApp::Spherical2Cartesians(float azimuth, float elevation, flo
 	pos.z = 0.0f;
 
 	return pos;
-}
-
-void ofApp::ShowSource2Position() {
-
-	showSource2PositionCounter++;
-	if (showSource2PositionCounter == 25) {
-		showSource2PositionCounter = 0;
-		std::cout << "Source 2 --> Azimuth (" << rad2deg(source2Azimuth) << "), Elevation (" << rad2deg(source2Elevation) << "), Distance (" << source2Distance << ")." << std::endl;
-	}
-}
-float ofApp::rad2deg(float rad) {
-
-	return (rad * 180.0) / M_PI;
 }
 
 ///////////////////////

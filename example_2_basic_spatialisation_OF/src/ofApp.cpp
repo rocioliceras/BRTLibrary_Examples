@@ -202,7 +202,7 @@ void ofApp::AudioSetup() {
 
 	//outputParameters.getOutDevice();
 	ofSoundDevice device = ShowSelectAudioDeviceMenu();
-	outputParameters.setOutDevice(device); //Aqui he elegido mis auriculares porque el por defecto no se escuchaba
+	outputParameters.setOutDevice(device); 
 
 	// Setting real-time audio output.
 	setRealTimePriority();

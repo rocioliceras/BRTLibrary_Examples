@@ -4,7 +4,7 @@
 
 #define SAMPLERATE 44100
 
-#define SOURCE1_FILEPATH "resources/stereo_test.wav"
+#define SOURCE_FILEPATH "../resources/stereo_test.wav"
 #define HRTFRESAMPLINGSTEP 15
 
 #define SOURCE1_INITIAL_AZIMUTH 90
@@ -14,7 +14,6 @@
 #define SOURCE2_INITIAL_AZIMUTH -90
 #define SOURCE2_INITIAL_ELEVATION 0
 #define SOURCE2_INITIAL_DISTANCE 2
-#define SOURCE2_INITIAL_SPEED 0.001
 
 #include "ConfigurationA.hpp"
 #include "ConfigurationB.hpp"
@@ -76,20 +75,18 @@ public:
 	void AudioSetup();
 	ofSoundDevice ShowSelectAudioDeviceMenu();
 	char ShowConfigurationMenu();
-
 	void audioOut(ofSoundBuffer & buffer);
 	void audioProcess(Common::CEarPair<CMonoBuffer<float>> & bufferOutput, int uiBufferSize);
-	void FillBuffer(CMonoBuffer<float> & output, unsigned int & position, unsigned int & endFrame, std::vector<float> & samplesVector);
-	void LoadWav(std::vector<float> & samplesVector1, std::vector<float> & samplesVector2, const char * stringIn);
-	std::shared_ptr<BRTSourceModel::CSourceSimpleModel> CreateSimpleSoundSource(std::string _soundSourceID);
-	void MoveSource_CircularHorizontalPath();
-	Common::CVector3 Spherical2Cartesians(float azimuth, float elevation, float radius);
-	void ShowSource2Position();
-	float rad2deg(float rad);
+
+
 
 private:
 	void setRealTimePriority() {
 		HANDLE hThread = GetCurrentThread();
 		SetThreadPriority(hThread, THREAD_PRIORITY_TIME_CRITICAL);
 	}
+	void FillBuffer(CMonoBuffer<float> & output, unsigned int & position, unsigned int & endFrame, std::vector<float> & samplesVector);
+	void LoadWav(std::vector<float> & samplesVector1, std::vector<float> & samplesVector2, const char * stringIn);
+	std::shared_ptr<BRTSourceModel::CSourceSimpleModel> CreateSimpleSoundSource(std::string _soundSourceID);
+	Common::CVector3 Spherical2Cartesians(float azimuth, float elevation, float radius);
 };
