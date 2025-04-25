@@ -1,4 +1,25 @@
-﻿#include "ofApp.h"
+﻿/**
+* \class ofApp
+*
+* \date	April 2025
+*
+* \authors 3DI-DIANA Research Group (University of Malaga), in alphabetical order: M. Cuevas-Rodriguez, D. Gonzalez-Toledo, L. Molina-Tanco, F. Morales-Benitez ||
+* Coordinated by , A. Reyes-Lecuona (University of Malaga)||
+* \b Contact: areyes@uma.es
+*
+* \b Copyright: University of Malaga
+* 
+* \b Contributions: R. Liceras-Ramirez
+*
+* \b Project: SONICOM ||
+* \b Website: https://www.sonicom.eu/
+*
+* \b Acknowledgement: This project has received funding from the European Union�s Horizon 2020 research and innovation programme under grant agreement no.101017743
+* 
+* \b Licence: This program is free software, you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+*/
+
+#include "ofApp.h"
 
 #if defined(__linux__) || defined(linux)
 	#include <bits/stdc++.h>
@@ -335,7 +356,7 @@ void ofApp::ShowIntroduction() {
 	std::cout << "BRT is a modular library designed to provide highly configurable rendering adaptable to various needs.\n";
 	std::cout << "Thanks to its flexible structure, it allows multiple modules to be interconnected to optimize performance according to the user's specific requirements.\n\n";
 	std::cout << "This example demonstrates different ways to instantiate and configure the modules, although many more possibilities are not explored here, such as rendering with multiple listeners.\n\n";
-	std::cout << "The purpose of this example is to show how to work with stereo audio. You are free to use, copy, or modify the code as needed.\n\n";
+	std::cout << "The purpose of this example is to show how to work with stereo audio usign OpenFrameworks. You are free to use, copy, or modify the code as needed.\n\n";
 
 	std::cout << "As a demonstration, in this example, you will hear a man indicating if the sound comes from the righ side, the left side or both.\n";
 
