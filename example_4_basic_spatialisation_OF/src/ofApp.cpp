@@ -35,10 +35,10 @@ void ofApp::setup() {
 	BRT_ERRORHANDLER.SetVerbosityMode(VERBOSITYMODE_ERRORSANDWARNINGS);
 	BRT_ERRORHANDLER.SetErrorLogStream(&std::cout, true);
 
-	/// Show introduction message
+	// /// Show introduction message
 	ShowIntroduction();
 
-	/// Select Buffer Size
+	// /// Select Buffer Size
 	std::cout << "Insert wished buffer size (256, 512, 1024, 2048, 4096...)\n(2048 at least recommended for linux)\t: ";
 	std::cin >> iBufferSize;
 	std::cin.ignore();
@@ -81,18 +81,18 @@ void ofApp::setup() {
 	/////////////////////
 	// Create Sources
 	/////////////////////
-	source1BRT = CreateSimpleSoundSource("ChanelL");
-	source2BRT = CreateSimpleSoundSource("ChanelR");
+	source1BRT = CreateSimpleSoundSource("speech");
+	source2BRT = CreateSimpleSoundSource("steps");
 
 	if (selection == 'A') {
-		configurationA.ConnectSoundSource(&brtManager, "ChanelL");
-		configurationA.ConnectSoundSource(&brtManager, "ChanelR");
+		configurationA.ConnectSoundSource(&brtManager, "speech");
+		configurationA.ConnectSoundSource(&brtManager, "steps");
 	} else if (selection == 'B') {
-		configurationB.ConnectSoundSource(&brtManager, "ChanelL");
-		configurationB.ConnectSoundSource(&brtManager, "ChanelR");
+		configurationB.ConnectSoundSource(&brtManager, "speech");
+		configurationB.ConnectSoundSource(&brtManager, "steps");
 	} else if (selection == 'C') {
-		configurationC.ConnectSoundSource(&brtManager, "ChanelL");
-		configurationC.ConnectSoundSource(&brtManager, "ChanelR");
+		configurationC.ConnectSoundSource(&brtManager, "speech");
+		configurationC.ConnectSoundSource(&brtManager, "steps");
 	}
 
 	/////////////////////
@@ -102,14 +102,37 @@ void ofApp::setup() {
 	source1.SetPosition(Spherical2Cartesians(SOURCE1_INITIAL_AZIMUTH, SOURCE1_INITIAL_ELEVATION, SOURCE1_INITIAL_DISTANCE));
 	source1BRT->SetSourceTransform(source1);
 
+	source2Azimuth = SOURCE2_INITIAL_AZIMUTH;
+	source2Elevation = SOURCE2_INITIAL_ELEVATION;
+	source2Distance = SOURCE2_INITIAL_DISTANCE;
 	Common::CTransform source2 = Common::CTransform();
-	source2.SetPosition(Spherical2Cartesians(SOURCE2_INITIAL_AZIMUTH, SOURCE2_INITIAL_ELEVATION, SOURCE2_INITIAL_DISTANCE));
+	source2.SetPosition(Spherical2Cartesians(source2Azimuth, source2Elevation, source2Distance));
 	source2BRT->SetSourceTransform(source2); // Set source2 position
+	showSource2PositionCounter = 0;
 
 	// /////////////////////
 	// Load Wav Files
 	/////////////////////
-	LoadWav(samplesVectorSource1, samplesVectorSource2, SOURCE_FILEPATH); // Loading .wav file
+	LoadWav(samplesVectorSource1, SOURCE1_FILEPATH); // Loading .wav file
+	LoadWav(samplesVectorSource2, SOURCE2_FILEPATH); // Loading .wav file
+
+	// /////////////////////
+	// Load Images
+	/////////////////////
+
+	AzimuthImage.load("azimuth.png");
+	if (!AzimuthImage.isAllocated()) {
+		std::cerr << "ERROR: No se pudo cargar la imagen." << std::endl;
+	} else {
+		std::cout << "Imagen cargada correctamente: "
+				  << AzimuthImage.getWidth() << "x" << AzimuthImage.getHeight() << std::endl;
+	}
+	ofSetWindowShape(AzimuthImage.getWidth(), AzimuthImage.getHeight());
+
+	center.set(AzimuthImage.getWidth() / 2, AzimuthImage.getHeight() / 2);
+	dragPoint.set(center); // Inicialmente en el centro
+	currentX = AzimuthImage.getWidth() / 2;
+	currentY = AzimuthImage.getHeight() / 2;
 
 	/////////////////////
 	// Start AUDIO Render
@@ -130,25 +153,64 @@ void ofApp::setup() {
 	// Starting the stream
 	soundStream.start();
 
-	// Wait enter to finish
+	//Esto se deberá hacer en otro sitio porque si no el código se queda bloqueado y no salta el interfaz
+	/*// Wait enter to finish
 	std::cin.ignore();
 	char temp = getchar();
 
 	// Stopping and closing the stream
 	soundStream.stop();
-	soundStream.close();
+	soundStream.close();*/
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
+	ofBackground(255, 255, 255);
+
+	// Aquí solo se actualizan otras transformaciones generales
+	Common::CTransform source1 = Common::CTransform();
+	source1.SetPosition(Spherical2Cartesians(azimuth1, elevation1, distance1));
+	source1BRT->SetSourceTransform(source1);
+
+	// Aquí podrías hacer otras actualizaciones generales sin tocar el cálculo del ángulo
+	ofSoundUpdate();
 }
 
 //--------------------------------------------------------------
 void ofApp::draw() {
+	ofBackground(0);
+
+	// Dibuja la imagen centrada
+	AzimuthImage.draw(0, 0);
+
+	// Centro de la cabeza
+	ofVec2f center(AzimuthImage.getWidth() / 2, AzimuthImage.getHeight() / 2);
+
+	// Punto actual (el que mueves tú)
+	ofVec2f point(currentX, currentY); // asegúrate de que estos valores estén dentro de la imagen
+
+	// Dibuja los puntos
+	ofSetColor(255, 0, 0);
+	ofDrawCircle(point, 5); // tu punto móvil
+
+	// Calcular ángulo con respecto al eje horizontal
+	float angleRad = atan2(point.y - center.y, point.x - center.x);
+	float angleDeg = ofRadToDeg(angleRad); // -180 a 180
+
+	// Ajustar a tu sistema:
+	// Frente (arriba) = 0°, Izquierda = 90°, Atrás = 180°, Derecha = 270°
+	float customAngle = fmod(450 - angleDeg, 360); // esto lo mantiene entre 0 y 360
+
+	if (customAngle < 0) customAngle += 360; // por si fmod devuelve negativo
+
+	// Muestra el ángulo en pantalla
+	ofSetColor(255);
+	ofDrawBitmapString("Ángulo personalizado: " + ofToString(customAngle, 2) + "°", 20, 20);
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
+
 }
 
 //--------------------------------------------------------------
@@ -161,6 +223,38 @@ void ofApp::mouseMoved(int x, int y) {
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button) {
+	// Actualiza la posición del ratón
+	currentX = x;
+	currentY = y;
+
+	// Calcular el centro de la imagen
+	float centerX = AzimuthImage.getWidth() / 2.0;
+	float centerY = AzimuthImage.getHeight() / 2.0;
+
+	// Calcular las diferencias de las coordenadas del ratón
+	float dx = currentX - centerX;
+	float dy = centerY - currentY;
+
+	// Calcular el ángulo en radianes
+	float angleRad = atan2(dy, dx);
+
+	// Convertir a grados
+	float angleDeg = ofRadToDeg(angleRad);
+
+	// Ajustar para que el "frente" (0°) esté hacia arriba
+	angleDeg = angleDeg - 90;
+
+	// Asegurarse de que el ángulo esté en el rango de 0–360 grados
+	if (angleDeg < 0) {
+		angleDeg += 360;
+	}
+	if (angleDeg >= 360) {
+		angleDeg -= 360;
+	}
+
+	azimuth1 = 3.14/180*angleDeg;
+	// Si lo necesitas, imprime el ángulo o actualiza la escena con este valor
+	std::cout << "Ángulo: " << angleDeg << " grados" << std::endl;
 }
 
 //--------------------------------------------------------------
@@ -198,6 +292,7 @@ void ofApp::AudioSetup() {
 	ofSoundStreamSettings outputParameters;
 	outputParameters.numOutputChannels = 2;
 
+	//outputParameters.getOutDevice();
 	ofSoundDevice device = ShowSelectAudioDeviceMenu();
 	outputParameters.setOutDevice(device);
 
@@ -281,6 +376,9 @@ void ofApp::audioOut(ofSoundBuffer & buffer) {
 		floatOutputBuffer[0] = *it; // Setting of value in actual buffer position
 		floatOutputBuffer = &floatOutputBuffer[1]; // Updating pointer to next buffer position
 	}
+
+	MoveSource_CircularHorizontalPath();
+	ShowSource2Position();
 }
 
 /// Function to process audio
@@ -318,7 +416,7 @@ void ofApp::FillBuffer(CMonoBuffer<float> & output, unsigned int & position, uns
 	}
 }
 
-void ofApp::LoadWav(std::vector<float> & samplesVector1, std::vector<float> & samplesVector2, const char * stringIn) {
+void ofApp::LoadWav(std::vector<float> & samplesVector, const char * stringIn) {
 	ofxAudioFile audioFile;
 	audioFile.load(stringIn);
 
@@ -332,16 +430,12 @@ void ofApp::LoadWav(std::vector<float> & samplesVector1, std::vector<float> & sa
 	size_t numSamples = audioFile.length();
 
 	// Clear the vector before filling it
-	samplesVector1.clear();
-	samplesVector1.reserve(numSamples); // Reserve memory to avoid reallocations
+	samplesVector.clear();
+	samplesVector.reserve(numSamples); // Reserve memory to avoid reallocations
 
-	samplesVector2.clear();
-	samplesVector2.reserve(numSamples); // Reserve memory to avoid reallocations
-
-	// Extract samples
+	// Extract samples (only from the left channel if stereo)
 	for (size_t i = 0; i < numSamples; i++) {
-		samplesVector1.push_back(audioFile.sample(i, 0)); // 0 = left channel
-		samplesVector2.push_back(audioFile.sample(i, 1)); // 1 = right channel
+		samplesVector.push_back(audioFile.sample(i, 0)); // 0 = left channel
 	}
 }
 
@@ -356,9 +450,10 @@ void ofApp::ShowIntroduction() {
 	std::cout << "BRT is a modular library designed to provide highly configurable rendering adaptable to various needs.\n";
 	std::cout << "Thanks to its flexible structure, it allows multiple modules to be interconnected to optimize performance according to the user's specific requirements.\n\n";
 	std::cout << "This example demonstrates different ways to instantiate and configure the modules, although many more possibilities are not explored here, such as rendering with multiple listeners.\n\n";
-	std::cout << "The purpose of this example is to show how to work with stereo audio usign OpenFrameworks. You are free to use, copy, or modify the code as needed.\n\n";
+	std::cout << "The purpose of this example is to complement the first example using OpenFrameworks. You are free to use, copy, or modify the code as needed.\n\n";
 
-	std::cout << "As a demonstration, in this example, you will hear a man indicating if the sound comes from the righ side, the left side or both.\n";
+	std::cout << "As a demonstration, in this example, you will hear a woman's voice coming from your left while footsteps move around you simultaneously.\n";
+	std::cout << "The screen will display the position of these footsteps in real-time.\n\n";
 
 	std::cout << "============================================\n\n";
 }
@@ -391,6 +486,17 @@ char ofApp::ShowConfigurationMenu() {
 ///////////////////////
 // SOURCE MOVEMENT
 ///////////////////////
+void ofApp::MoveSource_CircularHorizontalPath() {
+
+	Common::CVector3 newPosition;
+	source2Azimuth += SOURCE2_INITIAL_SPEED;
+	if (source2Azimuth > 2 * M_PI) source2Azimuth = 0;
+	newPosition = Spherical2Cartesians(source2Azimuth, source2Elevation, source2Distance);
+
+	Common::CTransform sourcePosition = source2BRT->GetSourceTransform();
+	sourcePosition.SetPosition(newPosition);
+	source2BRT->SetSourceTransform(sourcePosition);
+}
 
 Common::CVector3 ofApp::Spherical2Cartesians(float azimuth, float elevation, float radius) {
 
@@ -405,6 +511,19 @@ Common::CVector3 ofApp::Spherical2Cartesians(float azimuth, float elevation, flo
 	pos.z = 0.0f;
 
 	return pos;
+}
+
+void ofApp::ShowSource2Position() {
+
+	showSource2PositionCounter++;
+	if (showSource2PositionCounter == 25) {
+		showSource2PositionCounter = 0;
+		std::cout << "Source 2 --> Azimuth (" << azimuth1 << "), Elevation (" << rad2deg(elevation1) << "), Distance (" << distance1 << ")." << std::endl;
+	}
+}
+float ofApp::rad2deg(float rad) {
+
+	return (rad * 180.0) / M_PI;
 }
 
 ///////////////////////

@@ -21,20 +21,24 @@
 
 #pragma once
 
+#include "ofMain.h"
+
 #define LISTENER_ID "listener1"
 
 #define SAMPLERATE 44100
 
-#define SOURCE_FILEPATH "../resources/stereo_test.wav"
+#define SOURCE1_FILEPATH "../resources/speech.wav"
+#define SOURCE2_FILEPATH "../resources/steps.wav"
 #define HRTFRESAMPLINGSTEP 15
 
 #define SOURCE1_INITIAL_AZIMUTH 90
 #define SOURCE1_INITIAL_ELEVATION 0
 #define SOURCE1_INITIAL_DISTANCE 2
 
-#define SOURCE2_INITIAL_AZIMUTH -90
+#define SOURCE2_INITIAL_AZIMUTH 0
 #define SOURCE2_INITIAL_ELEVATION 0
 #define SOURCE2_INITIAL_DISTANCE 2
+#define SOURCE2_INITIAL_SPEED 0.001
 
 #include "ConfigurationA.hpp"
 #include "ConfigurationB.hpp"
@@ -64,6 +68,12 @@ float source2Elevation;
 float source2Distance;
 int showSource2PositionCounter;
 
+
+ofImage AzimuthImage;
+ofVec2f center, dragPoint;
+bool isDragging = false;
+float currentX, currentY;
+
 Common::CEarPair<CMonoBuffer<float>> outputBufferStereo; // Stereo buffer containing processed audio
 std::vector<float> samplesVectorSource1; // Storages the audio from the wav files
 std::vector<float> samplesVectorSource2; // Storages the audio from the wav files
@@ -72,6 +82,10 @@ unsigned int wavSamplePositionSource1; // Storages, respectively, the starting a
 unsigned int positionEndFrameSource1;
 unsigned int wavSamplePositionSource2;
 unsigned int positionEndFrameSource2;
+
+float azimuth1 = 0;
+float elevation1 = 0;
+float distance1 = 2;
 
 class ofApp : public ofBaseApp {
 
@@ -105,7 +119,10 @@ private:
 		SetThreadPriority(hThread, THREAD_PRIORITY_TIME_CRITICAL);
 	}
 	void FillBuffer(CMonoBuffer<float> & output, unsigned int & position, unsigned int & endFrame, std::vector<float> & samplesVector);
-	void LoadWav(std::vector<float> & samplesVector1, std::vector<float> & samplesVector2, const char * stringIn);
+	void LoadWav(std::vector<float> & samplesVector, const char * stringIn);
 	std::shared_ptr<BRTSourceModel::CSourceSimpleModel> CreateSimpleSoundSource(std::string _soundSourceID);
+	void MoveSource_CircularHorizontalPath();
 	Common::CVector3 Spherical2Cartesians(float azimuth, float elevation, float radius);
+	void ShowSource2Position();
+	float rad2deg(float rad);
 };
