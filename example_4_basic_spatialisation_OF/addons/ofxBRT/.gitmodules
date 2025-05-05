@@ -1,0 +1,6 @@
+[submodule "libs/brt"]
+	path = libs/brt
+	url = https://proyectos.diana.uma.es:444/3ddiana/brt.git
+[submodule "libs/libsofa"]
+	path = libs/libsofa
+	url = https://github.com/lmtanco/API_Cpp.git
