@@ -70,9 +70,12 @@ int showSource2PositionCounter;
 
 
 ofImage AzimuthImage;
+ofImage ElevationImage;
 ofVec2f center, dragPoint;
+ofVec2f elevationPoint;
 bool isDragging = false;
-float currentX, currentY;
+float azimuthX, azimuthY;
+float elevationX, elevationY;
 
 Common::CEarPair<CMonoBuffer<float>> outputBufferStereo; // Stereo buffer containing processed audio
 std::vector<float> samplesVectorSource1; // Storages the audio from the wav files
@@ -83,9 +86,9 @@ unsigned int positionEndFrameSource1;
 unsigned int wavSamplePositionSource2;
 unsigned int positionEndFrameSource2;
 
-float azimuth1 = 0;
-float elevation1 = 0;
-float distance1 = 2;
+float azimuth1 = 0.0f;
+float elevation1 = 0.0f;
+float distance1 = 2.0f;
 
 class ofApp : public ofBaseApp {
 

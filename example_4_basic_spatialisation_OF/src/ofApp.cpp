@@ -114,25 +114,31 @@ void ofApp::setup() {
 	// Load Wav Files
 	/////////////////////
 	LoadWav(samplesVectorSource1, SOURCE1_FILEPATH); // Loading .wav file
-	LoadWav(samplesVectorSource2, SOURCE2_FILEPATH); // Loading .wav file
+	//LoadWav(samplesVectorSource2, SOURCE2_FILEPATH); // Loading .wav file
 
 	// /////////////////////
 	// Load Images
 	/////////////////////
 
-	AzimuthImage.load("azimuth.png");
+	AzimuthImage.load("azimuth.jpg");
+	ElevationImage.load("elevation.jpg");
 	if (!AzimuthImage.isAllocated()) {
 		std::cerr << "ERROR: No se pudo cargar la imagen." << std::endl;
 	} else {
 		std::cout << "Imagen cargada correctamente: "
 				  << AzimuthImage.getWidth() << "x" << AzimuthImage.getHeight() << std::endl;
 	}
-	ofSetWindowShape(AzimuthImage.getWidth(), AzimuthImage.getHeight());
+	ofSetWindowShape(AzimuthImage.getWidth()+ElevationImage.getWidth(), AzimuthImage.getHeight());
 
 	center.set(AzimuthImage.getWidth() / 2, AzimuthImage.getHeight() / 2);
 	dragPoint.set(center); // Inicialmente en el centro
-	currentX = AzimuthImage.getWidth() / 2;
-	currentY = AzimuthImage.getHeight() / 2;
+	elevationPoint.set(AzimuthImage.getWidth() + ElevationImage.getWidth() / 2, AzimuthImage.getHeight() / 2);
+
+	azimuthX = AzimuthImage.getWidth() / 2.0;
+	azimuthY = AzimuthImage.getHeight() / 2.0;
+
+	elevationX = ElevationImage.getWidth() / 2.0;
+	elevationY = ElevationImage.getHeight() / 2.0;
 
 	/////////////////////
 	// Start AUDIO Render
@@ -167,37 +173,37 @@ void ofApp::setup() {
 void ofApp::update() {
 	ofBackground(255, 255, 255);
 
-	// Aquí solo se actualizan otras transformaciones generales
 	Common::CTransform source1 = Common::CTransform();
 	source1.SetPosition(Spherical2Cartesians(azimuth1, elevation1, distance1));
-	source1BRT->SetSourceTransform(source1);
+	if (source1BRT) {
+		source1BRT->SetSourceTransform(source1);
+	}
 
-	// Aquí podrías hacer otras actualizaciones generales sin tocar el cálculo del ángulo
 	ofSoundUpdate();
 }
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-	ofBackground(0);
+	ofBackground(255);
 
 	// Dibuja la imagen centrada
 	AzimuthImage.draw(0, 0);
-
-	// Centro de la cabeza
-	ofVec2f center(AzimuthImage.getWidth() / 2, AzimuthImage.getHeight() / 2);
+	ElevationImage.draw(AzimuthImage.getWidth(), 0);
 
 	// Punto actual (el que mueves tú)
-	ofVec2f point(currentX, currentY); // asegúrate de que estos valores estén dentro de la imagen
+	ofVec2f point(azimuthX, azimuthY); // asegúrate de que estos valores estén dentro de la imagen
 
 	// Dibuja los puntos
 	ofSetColor(255, 0, 0);
-	ofDrawCircle(point, 5); // tu punto móvil
+	ofDrawCircle(azimuthX, azimuthY, 10);
+
+	ofSetColor(255, 0, 0);
+	ofDrawCircle(AzimuthImage.getWidth() + elevationX, elevationY, 10);
 
 	// Calcular ángulo con respecto al eje horizontal
 	float angleRad = atan2(point.y - center.y, point.x - center.x);
 	float angleDeg = ofRadToDeg(angleRad); // -180 a 180
 
-	// Ajustar a tu sistema:
 	// Frente (arriba) = 0°, Izquierda = 90°, Atrás = 180°, Derecha = 270°
 	float customAngle = fmod(450 - angleDeg, 360); // esto lo mantiene entre 0 y 360
 
@@ -223,38 +229,57 @@ void ofApp::mouseMoved(int x, int y) {
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button) {
-	// Actualiza la posición del ratón
-	currentX = x;
-	currentY = y;
+	if (x <= AzimuthImage.getWidth()) {
+		azimuthX = x;
+		azimuthY = y;
 
-	// Calcular el centro de la imagen
-	float centerX = AzimuthImage.getWidth() / 2.0;
-	float centerY = AzimuthImage.getHeight() / 2.0;
+		float centerX = AzimuthImage.getWidth() / 2.0;
+		float centerY = AzimuthImage.getHeight() / 2.0;
 
-	// Calcular las diferencias de las coordenadas del ratón
-	float dx = currentX - centerX;
-	float dy = centerY - currentY;
+		float dx = azimuthX - centerX;
+		float dy = centerY - azimuthY;
 
-	// Calcular el ángulo en radianes
-	float angleRad = atan2(dy, dx);
+		float angleRad = atan2(dy, dx);
+		float angleDeg = ofRadToDeg(angleRad);
 
-	// Convertir a grados
-	float angleDeg = ofRadToDeg(angleRad);
+		angleDeg -= 90;
+		if (angleDeg < 0) angleDeg += 360;
+		if (angleDeg >= 360) angleDeg -= 360;
 
-	// Ajustar para que el "frente" (0°) esté hacia arriba
-	angleDeg = angleDeg - 90;
+		azimuth1 = ofDegToRad(angleDeg);
 
-	// Asegurarse de que el ángulo esté en el rango de 0–360 grados
-	if (angleDeg < 0) {
-		angleDeg += 360;
+		std::cout << "Azimut: " << angleDeg << " grados" << std::endl;
+	} else if (x <= AzimuthImage.getWidth() + ElevationImage.getWidth()) {
+		elevationX = x - AzimuthImage.getWidth();
+		elevationY = y;
+
+		float centerX = ElevationImage.getWidth() / 2.0;
+		float centerY = ElevationImage.getHeight() / 2.0;
+
+		float dx = elevationX - centerX;
+		float dy = centerY - elevationY;
+
+		float angleRad = 0.0f; // Valor por defecto
+
+		// Evita atan2(0, 0) que es indefinido
+		if (!(dx == 0 && dy == 0)) {
+			angleRad = atan2(dy, dx);
+		} else {
+			angleRad = atan2(dy+0.01, dx+0.01);
+		}
+
+		float angleDeg = ofRadToDeg(angleRad);
+
+		// Asegurar que esté en el rango [-90, 90]
+		if (angleDeg > 90) {
+			angleDeg = 180 - angleDeg;
+		} else if (angleDeg < -90) {
+			angleDeg = -180 - angleDeg;
+		}
+
+		// Convertir de nuevo a radianes
+		elevation1 = ofDegToRad(angleDeg);
 	}
-	if (angleDeg >= 360) {
-		angleDeg -= 360;
-	}
-
-	azimuth1 = 3.14/180*angleDeg;
-	// Si lo necesitas, imprime el ángulo o actualiza la escena con este valor
-	std::cout << "Ángulo: " << angleDeg << " grados" << std::endl;
 }
 
 //--------------------------------------------------------------
@@ -518,7 +543,7 @@ void ofApp::ShowSource2Position() {
 	showSource2PositionCounter++;
 	if (showSource2PositionCounter == 25) {
 		showSource2PositionCounter = 0;
-		std::cout << "Source 2 --> Azimuth (" << azimuth1 << "), Elevation (" << rad2deg(elevation1) << "), Distance (" << distance1 << ")." << std::endl;
+		std::cout << "Source 2 --> Azimuth (" << rad2deg(azimuth1) << "), Elevation (" << rad2deg(elevation1) << "), Distance (" << distance1 << ")." << std::endl;
 	}
 }
 float ofApp::rad2deg(float rad) {
