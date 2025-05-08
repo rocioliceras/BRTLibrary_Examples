@@ -102,19 +102,15 @@ void ofApp::setup() {
 	source1.SetPosition(Spherical2Cartesians(SOURCE1_INITIAL_AZIMUTH, SOURCE1_INITIAL_ELEVATION, SOURCE1_INITIAL_DISTANCE));
 	source1BRT->SetSourceTransform(source1);
 
-	source2Azimuth = SOURCE2_INITIAL_AZIMUTH;
-	source2Elevation = SOURCE2_INITIAL_ELEVATION;
-	source2Distance = SOURCE2_INITIAL_DISTANCE;
 	Common::CTransform source2 = Common::CTransform();
-	source2.SetPosition(Spherical2Cartesians(source2Azimuth, source2Elevation, source2Distance));
-	source2BRT->SetSourceTransform(source2); // Set source2 position
-	showSource2PositionCounter = 0;
+	source2.SetPosition(Spherical2Cartesians(SOURCE2_INITIAL_AZIMUTH, SOURCE2_INITIAL_ELEVATION, SOURCE2_INITIAL_DISTANCE));
+	source2BRT->SetSourceTransform(source2); 
 
 	// /////////////////////
 	// Load Wav Files
 	/////////////////////
 	LoadWav(samplesVectorSource1, SOURCE1_FILEPATH); // Loading .wav file
-	//LoadWav(samplesVectorSource2, SOURCE2_FILEPATH); // Loading .wav file
+	LoadWav(samplesVectorSource2, SOURCE2_FILEPATH); // Loading .wav file
 
 	// /////////////////////
 	// Load Images
@@ -137,8 +133,15 @@ void ofApp::setup() {
 	azimuthX = AzimuthImage.getWidth() / 2.0;
 	azimuthY = AzimuthImage.getHeight() / 2.0;
 
+	azimuthX2 = AzimuthImage.getWidth() / 2.0;
+	azimuthY2 = AzimuthImage.getHeight() / 2.0;
+
+
 	elevationX = ElevationImage.getWidth() / 2.0;
 	elevationY = ElevationImage.getHeight() / 2.0;
+
+	elevationX2 = ElevationImage.getWidth() / 2.0;
+	elevationY2 = ElevationImage.getHeight() / 2.0;
 
 	/////////////////////
 	// Start AUDIO Render
@@ -179,6 +182,12 @@ void ofApp::update() {
 		source1BRT->SetSourceTransform(source1);
 	}
 
+	Common::CTransform source2 = Common::CTransform();
+	source2.SetPosition(Spherical2Cartesians(azimuth2, elevation2, distance2));
+	if (source2BRT) {
+		source2BRT->SetSourceTransform(source2);
+	}
+
 	ofSoundUpdate();
 }
 
@@ -186,32 +195,30 @@ void ofApp::update() {
 void ofApp::draw() {
 	ofBackground(255);
 
-	// Dibuja la imagen centrada
+	// Dibuja las dos imágenes
 	AzimuthImage.draw(0, 0);
 	ElevationImage.draw(AzimuthImage.getWidth(), 0);
 
-	// Punto actual (el que mueves tú)
-	ofVec2f point(azimuthX, azimuthY); // asegúrate de que estos valores estén dentro de la imagen
-
-	// Dibuja los puntos
-	ofSetColor(255, 0, 0);
+	// Dibuja puntos de Azimuth
+	ofSetColor(255, 0, 0); // Rojo
 	ofDrawCircle(azimuthX, azimuthY, 10);
+	ofSetColor(0, 0, 255); // Azul
+	ofDrawCircle(azimuthX2, azimuthY2, 10);
 
-	ofSetColor(255, 0, 0);
+	// Dibuja puntos de Elevation
+	ofSetColor(255, 0, 0); // Rojo
 	ofDrawCircle(AzimuthImage.getWidth() + elevationX, elevationY, 10);
+	ofSetColor(0, 0, 255); // Azul
+	ofDrawCircle(AzimuthImage.getWidth() + elevationX2, elevationY2, 10);
 
-	// Calcular ángulo con respecto al eje horizontal
-	float angleRad = atan2(point.y - center.y, point.x - center.x);
-	float angleDeg = ofRadToDeg(angleRad); // -180 a 180
-
-	// Frente (arriba) = 0°, Izquierda = 90°, Atrás = 180°, Derecha = 270°
-	float customAngle = fmod(450 - angleDeg, 360); // esto lo mantiene entre 0 y 360
-
-	if (customAngle < 0) customAngle += 360; // por si fmod devuelve negativo
-
-	// Muestra el ángulo en pantalla
+	// Ejemplo: Mostrar solo el ángulo del punto rojo de azimut
 	ofSetColor(255);
-	ofDrawBitmapString("Ángulo personalizado: " + ofToString(customAngle, 2) + "°", 20, 20);
+	float angleRad = atan2(azimuthY - center.y, azimuthX - center.x);
+	float angleDeg = ofRadToDeg(angleRad);
+	float customAngle = fmod(450 - angleDeg, 360);
+	if (customAngle < 0) customAngle += 360;
+
+	ofDrawBitmapString("Ángulo Azimut (rojo): " + ofToString(customAngle, 2) + "°", 20, 20);
 }
 
 //--------------------------------------------------------------
@@ -221,6 +228,7 @@ void ofApp::keyPressed(int key) {
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key) {
+	
 }
 
 //--------------------------------------------------------------
@@ -229,15 +237,19 @@ void ofApp::mouseMoved(int x, int y) {
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button) {
-	if (x <= AzimuthImage.getWidth()) {
-		azimuthX = x;
-		azimuthY = y;
+	switch (dragging) {
+	case AZIMUTH_RED:
+	case AZIMUTH_BLUE: {
+		float & ax = (dragging == AZIMUTH_RED) ? azimuthX : azimuthX2;
+		float & ay = (dragging == AZIMUTH_RED) ? azimuthY : azimuthY2;
+		ax = x;
+		ay = y;
 
 		float centerX = AzimuthImage.getWidth() / 2.0;
 		float centerY = AzimuthImage.getHeight() / 2.0;
 
-		float dx = azimuthX - centerX;
-		float dy = centerY - azimuthY;
+		float dx = ax - centerX;
+		float dy = centerY - ay;
 
 		float angleRad = atan2(dy, dx);
 		float angleDeg = ofRadToDeg(angleRad);
@@ -246,48 +258,81 @@ void ofApp::mouseDragged(int x, int y, int button) {
 		if (angleDeg < 0) angleDeg += 360;
 		if (angleDeg >= 360) angleDeg -= 360;
 
-		azimuth1 = ofDegToRad(angleDeg);
+		if (dragging == AZIMUTH_RED) {
+			azimuth1 = ofDegToRad(angleDeg);
+		} else {
+			azimuth2 = ofDegToRad(angleDeg);
+		}
 
 		std::cout << "Azimut: " << angleDeg << " grados" << std::endl;
-	} else if (x <= AzimuthImage.getWidth() + ElevationImage.getWidth()) {
-		elevationX = x - AzimuthImage.getWidth();
-		elevationY = y;
+		break;
+	}
+	case ELEVATION_RED:
+	case ELEVATION_BLUE: {
+		float & ex = (dragging == ELEVATION_RED) ? elevationX : elevationX2;
+		float & ey = (dragging == ELEVATION_RED) ? elevationY : elevationY2;
+		ex = x - AzimuthImage.getWidth();
+		ey = y;
 
 		float centerX = ElevationImage.getWidth() / 2.0;
 		float centerY = ElevationImage.getHeight() / 2.0;
 
-		float dx = elevationX - centerX;
-		float dy = centerY - elevationY;
+		float dx = ex - centerX;
+		float dy = centerY - ey;
 
-		float angleRad = 0.0f; // Valor por defecto
-
-		// Evita atan2(0, 0) que es indefinido
+		float angleRad = 0.0f;
 		if (!(dx == 0 && dy == 0)) {
 			angleRad = atan2(dy, dx);
 		} else {
-			angleRad = atan2(dy+0.01, dx+0.01);
+			angleRad = atan2(dy + 0.01, dx + 0.01);
 		}
 
 		float angleDeg = ofRadToDeg(angleRad);
 
-		// Asegurar que esté en el rango [-90, 90]
 		if (angleDeg > 90) {
 			angleDeg = 180 - angleDeg;
 		} else if (angleDeg < -90) {
 			angleDeg = -180 - angleDeg;
 		}
 
-		// Convertir de nuevo a radianes
-		elevation1 = ofDegToRad(angleDeg);
+		if (dragging == ELEVATION_RED) {
+			elevation1 = ofDegToRad(angleDeg);
+		} else {
+			elevation2 = ofDegToRad(angleDeg);
+		}
+		break;
+	}
+	default:
+		break;
 	}
 }
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button) {
+	float minDistance = 20.0f; // radio de detección
+
+	ofVec2f mouse(x, y);
+	ofVec2f azRed(azimuthX, azimuthY);
+	ofVec2f azBlue(azimuthX2, azimuthY2);
+	ofVec2f elRed(AzimuthImage.getWidth() + elevationX, elevationY);
+	ofVec2f elBlue(AzimuthImage.getWidth() + elevationX2, elevationY2);
+
+	if (mouse.distance(azRed) < minDistance) {
+		dragging = AZIMUTH_RED;
+	} else if (mouse.distance(azBlue) < minDistance) {
+		dragging = AZIMUTH_BLUE;
+	} else if (mouse.distance(elRed) < minDistance) {
+		dragging = ELEVATION_RED;
+	} else if (mouse.distance(elBlue) < minDistance) {
+		dragging = ELEVATION_BLUE;
+	} else {
+		dragging = NONE;
+	}
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button) {
+	dragging = NONE;
 }
 
 //--------------------------------------------------------------
@@ -402,7 +447,6 @@ void ofApp::audioOut(ofSoundBuffer & buffer) {
 		floatOutputBuffer = &floatOutputBuffer[1]; // Updating pointer to next buffer position
 	}
 
-	MoveSource_CircularHorizontalPath();
 	ShowSource2Position();
 }
 
@@ -506,21 +550,6 @@ char ofApp::ShowConfigurationMenu() {
 	} while (option < 'A' || option > 'D'); // Repeat until a valid option is chosen
 
 	return option;
-}
-
-///////////////////////
-// SOURCE MOVEMENT
-///////////////////////
-void ofApp::MoveSource_CircularHorizontalPath() {
-
-	Common::CVector3 newPosition;
-	source2Azimuth += SOURCE2_INITIAL_SPEED;
-	if (source2Azimuth > 2 * M_PI) source2Azimuth = 0;
-	newPosition = Spherical2Cartesians(source2Azimuth, source2Elevation, source2Distance);
-
-	Common::CTransform sourcePosition = source2BRT->GetSourceTransform();
-	sourcePosition.SetPosition(newPosition);
-	source2BRT->SetSourceTransform(sourcePosition);
 }
 
 Common::CVector3 ofApp::Spherical2Cartesians(float azimuth, float elevation, float radius) {

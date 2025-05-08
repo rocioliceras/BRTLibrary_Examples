@@ -35,10 +35,10 @@
 #define SOURCE1_INITIAL_ELEVATION 0
 #define SOURCE1_INITIAL_DISTANCE 2
 
-#define SOURCE2_INITIAL_AZIMUTH 0
+#define SOURCE2_INITIAL_AZIMUTH 270
 #define SOURCE2_INITIAL_ELEVATION 0
 #define SOURCE2_INITIAL_DISTANCE 2
-#define SOURCE2_INITIAL_SPEED 0.001
+
 
 #include "ConfigurationA.hpp"
 #include "ConfigurationB.hpp"
@@ -74,8 +74,8 @@ ofImage ElevationImage;
 ofVec2f center, dragPoint;
 ofVec2f elevationPoint;
 bool isDragging = false;
-float azimuthX, azimuthY;
-float elevationX, elevationY;
+float azimuthX, azimuthY, azimuthX2, azimuthY2;
+float elevationX, elevationY, elevationX2, elevationY2;
 
 Common::CEarPair<CMonoBuffer<float>> outputBufferStereo; // Stereo buffer containing processed audio
 std::vector<float> samplesVectorSource1; // Storages the audio from the wav files
@@ -87,8 +87,23 @@ unsigned int wavSamplePositionSource2;
 unsigned int positionEndFrameSource2;
 
 float azimuth1 = 0.0f;
+float azimuth2 = 0.0f;
 float elevation1 = 0.0f;
+float elevation2 = 0.0f;
 float distance1 = 2.0f;
+float distance2 = 2.0f;
+
+enum DraggedPoint {
+	NONE,
+	AZIMUTH_RED,
+	AZIMUTH_BLUE,
+	ELEVATION_RED,
+	ELEVATION_BLUE
+};
+
+DraggedPoint dragging = NONE;
+
+
 
 class ofApp : public ofBaseApp {
 
@@ -124,7 +139,7 @@ private:
 	void FillBuffer(CMonoBuffer<float> & output, unsigned int & position, unsigned int & endFrame, std::vector<float> & samplesVector);
 	void LoadWav(std::vector<float> & samplesVector, const char * stringIn);
 	std::shared_ptr<BRTSourceModel::CSourceSimpleModel> CreateSimpleSoundSource(std::string _soundSourceID);
-	void MoveSource_CircularHorizontalPath();
+	
 	Common::CVector3 Spherical2Cartesians(float azimuth, float elevation, float radius);
 	void ShowSource2Position();
 	float rad2deg(float rad);
