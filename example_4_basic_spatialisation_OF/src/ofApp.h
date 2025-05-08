@@ -71,6 +71,8 @@ int showSource2PositionCounter;
 
 ofImage AzimuthImage;
 ofImage ElevationImage;
+ofImage VoiceImage;
+ofImage StepsImage;
 ofVec2f center, dragPoint;
 ofVec2f elevationPoint;
 bool isDragging = false;
@@ -95,10 +97,10 @@ float distance2 = 2.0f;
 
 enum DraggedPoint {
 	NONE,
-	AZIMUTH_RED,
-	AZIMUTH_BLUE,
-	ELEVATION_RED,
-	ELEVATION_BLUE
+	AZIMUTH_VOICE,
+	AZIMUTH_STEPS,
+	ELEVATION_VOICE,
+	ELEVATION_STEPS
 };
 
 DraggedPoint dragging = NONE;

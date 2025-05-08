@@ -118,6 +118,9 @@ void ofApp::setup() {
 
 	AzimuthImage.load("azimuth.jpg");
 	ElevationImage.load("elevation.jpg");
+	VoiceImage.load("voice.png");
+	StepsImage.load("steps.png");
+
 	if (!AzimuthImage.isAllocated()) {
 		std::cerr << "ERROR: No se pudo cargar la imagen." << std::endl;
 	} else {
@@ -195,30 +198,25 @@ void ofApp::update() {
 void ofApp::draw() {
 	ofBackground(255);
 
-	// Dibuja las dos imágenes
 	AzimuthImage.draw(0, 0);
 	ElevationImage.draw(AzimuthImage.getWidth(), 0);
 
-	// Dibuja puntos de Azimuth
-	ofSetColor(255, 0, 0); // Rojo
-	ofDrawCircle(azimuthX, azimuthY, 10);
-	ofSetColor(0, 0, 255); // Azul
-	ofDrawCircle(azimuthX2, azimuthY2, 10);
 
-	// Dibuja puntos de Elevation
-	ofSetColor(255, 0, 0); // Rojo
-	ofDrawCircle(AzimuthImage.getWidth() + elevationX, elevationY, 10);
-	ofSetColor(0, 0, 255); // Azul
-	ofDrawCircle(AzimuthImage.getWidth() + elevationX2, elevationY2, 10);
+	int iconSize = 60;
+	// Azimuth - voice
+	VoiceImage.draw(azimuthX - iconSize / 2, azimuthY - iconSize / 2, iconSize, iconSize);
 
-	// Ejemplo: Mostrar solo el ángulo del punto rojo de azimut
-	ofSetColor(255);
-	float angleRad = atan2(azimuthY - center.y, azimuthX - center.x);
-	float angleDeg = ofRadToDeg(angleRad);
-	float customAngle = fmod(450 - angleDeg, 360);
-	if (customAngle < 0) customAngle += 360;
+	// Azimuth - steps
+	StepsImage.draw(azimuthX2 - iconSize / 2, azimuthY2 - iconSize / 2, iconSize, iconSize);
 
-	ofDrawBitmapString("Ángulo Azimut (rojo): " + ofToString(customAngle, 2) + "°", 20, 20);
+	// Elevation - voice
+	VoiceImage.draw(AzimuthImage.getWidth() + elevationX - iconSize / 2,
+		elevationY - iconSize / 2, iconSize, iconSize);
+
+	// Elevation - steps
+	StepsImage.draw(AzimuthImage.getWidth() + elevationX2 - iconSize / 2,
+	elevationY2 - iconSize / 2, iconSize, iconSize);
+
 }
 
 //--------------------------------------------------------------
@@ -238,10 +236,10 @@ void ofApp::mouseMoved(int x, int y) {
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button) {
 	switch (dragging) {
-	case AZIMUTH_RED:
-	case AZIMUTH_BLUE: {
-		float & ax = (dragging == AZIMUTH_RED) ? azimuthX : azimuthX2;
-		float & ay = (dragging == AZIMUTH_RED) ? azimuthY : azimuthY2;
+	case AZIMUTH_VOICE:
+	case AZIMUTH_STEPS: {
+		float & ax = (dragging == AZIMUTH_VOICE) ? azimuthX : azimuthX2;
+		float & ay = (dragging == AZIMUTH_VOICE) ? azimuthY : azimuthY2;
 		ax = x;
 		ay = y;
 
@@ -258,7 +256,7 @@ void ofApp::mouseDragged(int x, int y, int button) {
 		if (angleDeg < 0) angleDeg += 360;
 		if (angleDeg >= 360) angleDeg -= 360;
 
-		if (dragging == AZIMUTH_RED) {
+		if (dragging == AZIMUTH_VOICE) {
 			azimuth1 = ofDegToRad(angleDeg);
 		} else {
 			azimuth2 = ofDegToRad(angleDeg);
@@ -267,10 +265,10 @@ void ofApp::mouseDragged(int x, int y, int button) {
 		std::cout << "Azimut: " << angleDeg << " grados" << std::endl;
 		break;
 	}
-	case ELEVATION_RED:
-	case ELEVATION_BLUE: {
-		float & ex = (dragging == ELEVATION_RED) ? elevationX : elevationX2;
-		float & ey = (dragging == ELEVATION_RED) ? elevationY : elevationY2;
+	case ELEVATION_VOICE:
+	case ELEVATION_STEPS: {
+		float & ex = (dragging == ELEVATION_VOICE) ? elevationX : elevationX2;
+		float & ey = (dragging == ELEVATION_VOICE) ? elevationY : elevationY2;
 		ex = x - AzimuthImage.getWidth();
 		ey = y;
 
@@ -295,7 +293,7 @@ void ofApp::mouseDragged(int x, int y, int button) {
 			angleDeg = -180 - angleDeg;
 		}
 
-		if (dragging == ELEVATION_RED) {
+		if (dragging == ELEVATION_VOICE) {
 			elevation1 = ofDegToRad(angleDeg);
 		} else {
 			elevation2 = ofDegToRad(angleDeg);
@@ -318,13 +316,13 @@ void ofApp::mousePressed(int x, int y, int button) {
 	ofVec2f elBlue(AzimuthImage.getWidth() + elevationX2, elevationY2);
 
 	if (mouse.distance(azRed) < minDistance) {
-		dragging = AZIMUTH_RED;
+		dragging = AZIMUTH_VOICE;
 	} else if (mouse.distance(azBlue) < minDistance) {
-		dragging = AZIMUTH_BLUE;
+		dragging = AZIMUTH_STEPS;
 	} else if (mouse.distance(elRed) < minDistance) {
-		dragging = ELEVATION_RED;
+		dragging = ELEVATION_VOICE;
 	} else if (mouse.distance(elBlue) < minDistance) {
-		dragging = ELEVATION_BLUE;
+		dragging = ELEVATION_STEPS;
 	} else {
 		dragging = NONE;
 	}
@@ -518,10 +516,10 @@ void ofApp::ShowIntroduction() {
 	std::cout << "============================================\n\n";
 	std::cout << "BRT is a modular library designed to provide highly configurable rendering adaptable to various needs.\n";
 	std::cout << "Thanks to its flexible structure, it allows multiple modules to be interconnected to optimize performance according to the user's specific requirements.\n\n";
-	std::cout << "This example demonstrates different ways to instantiate and configure the modules, although many more possibilities are not explored here, such as rendering with multiple listeners.\n\n";
-	std::cout << "The purpose of this example is to complement the first example using OpenFrameworks. You are free to use, copy, or modify the code as needed.\n\n";
+	std::cout << "This example allows the user to move two different sources along two axes: azimuth and elevation.\n\n";
+	std::cout << "The purpose of this example is to demonstrate user interaction with OpenFrameworks.\n\n";
 
-	std::cout << "As a demonstration, in this example, you will hear a woman's voice coming from your left while footsteps move around you simultaneously.\n";
+	std::cout << "As a demonstration, in this example, you will hear a woman's voice and some footsteps.\n";
 	std::cout << "The screen will display the position of these footsteps in real-time.\n\n";
 
 	std::cout << "============================================\n\n";
