@@ -243,6 +243,9 @@ void ofApp::mouseDragged(int x, int y, int button) {
 		ax = x;
 		ay = y;
 
+		// Conectamos el eje Y de azimuth con el eje X de elevación
+		elevationX = ay;
+
 		float centerX = AzimuthImage.getWidth() / 2.0;
 		float centerY = AzimuthImage.getHeight() / 2.0;
 
@@ -265,18 +268,22 @@ void ofApp::mouseDragged(int x, int y, int button) {
 		std::cout << "Azimut: " << angleDeg << " grados" << std::endl;
 		break;
 	}
+
 	case ELEVATION_VOICE:
 	case ELEVATION_STEPS: {
-		float & ex = (dragging == ELEVATION_VOICE) ? elevationX : elevationX2;
-		float & ey = (dragging == ELEVATION_VOICE) ? elevationY : elevationY2;
-		ex = x - AzimuthImage.getWidth();
-		ey = y;
+		float & ax = (dragging == ELEVATION_VOICE) ? elevationX : elevationX2;
+		float & az = (dragging == ELEVATION_VOICE) ? elevationY : elevationY2;
+		ax = x - AzimuthImage.getWidth();
+		az = y;
+
+		// Conectamos el eje X de elevación con el eje Y de azimuth
+		azimuthY = ax;
 
 		float centerX = ElevationImage.getWidth() / 2.0;
 		float centerY = ElevationImage.getHeight() / 2.0;
 
-		float dx = ex - centerX;
-		float dy = centerY - ey;
+		float dx = ax - centerX;
+		float dy = centerY - az;
 
 		float angleRad = 0.0f;
 		if (!(dx == 0 && dy == 0)) {
@@ -304,9 +311,11 @@ void ofApp::mouseDragged(int x, int y, int button) {
 		}
 		break;
 	}
+
 	default:
 		break;
 	}
+
 	}
 
 //--------------------------------------------------------------
@@ -554,54 +563,35 @@ char ofApp::ShowConfigurationMenu() {
 	return option;
 }
 
-// Función para interpolar entre dos valores de ángulos de manera suave
-float interpolateAngle(float prevAngle, float currentAngle, float alpha) {
-	float diff = currentAngle - prevAngle;
-	if (diff > 180.0f)
-		diff -= 360.0f; // Ajuste para el rango [-180, 180]
-	else if (diff < -180.0f)
-		diff += 360.0f;
-	return prevAngle + alpha * diff;
+
+ Common::CVector3 ofApp::Spherical2Cartesians(float azimuth, float elevation, float radius) {
+
+	// Suavizado de la elevación, solo si el valor es distinto al anterior
+	 float alpha = 0.1f; // Suavizado de la elevación
+	 if (prevElevation != elevation) {
+		 // Aplicar suavizado solo si la elevación es diferente
+		 elevation = prevElevation + alpha * (elevation - prevElevation);
+	 }
+
+	 // Limitar la elevación entre -90 y 90 grados
+	 elevation = std::max(-89.9f, std::min(89.9f, elevation));
+	 prevElevation = elevation; // Actualizar la elevación previa
+
+	 // Convertir a coordenadas cartesianas
+	 float x = radius * cos(azimuth) * cos(elevation);
+	 float y = radius * sin(azimuth) * cos(elevation);
+	 float z = radius * sin(elevation);
+
+	 // Obtener la posición actual del oyente
+	 Common::CVector3 pos = listener->GetListenerTransform().GetPosition();
+
+	 // Suavizado entre la posición actual y la nueva
+	 pos.x = pos.x + 0.1f * (x - pos.x);
+	 pos.y = pos.y + 0.1f * (y - pos.y);
+	 pos.z = pos.z + 0.1f * (z - pos.z);
+
+	 return pos;
 }
-
-Common::CVector3 ofApp::Spherical2Cartesians(float azimuth, float elevation, float radius) {
-	// Aplicar suavizado en la elevación utilizando interpolación
-	float alpha = 0.1f;
-	elevation1 = interpolateAngle(prevElevation, elevation, alpha);
-	prevElevation = elevation; 
-
-	// Verificar que la elevación no salga de los límites -90 a 90
-	elevation = std::max(-89.9f, std::min(89.9f, elevation));
-
-	
-	float x = radius * cos(azimuth) * cos(elevation);
-	float y = radius * sin(azimuth) * cos(elevation);
-	float z = radius * sin(elevation);
-
-	Common::CVector3 pos = listener->GetListenerTransform().GetPosition();
-
-	// Interpolación suave entre la posición actual y la nueva
-	pos.x = pos.x + 0.1f * (x - pos.x);
-	pos.y = pos.y + 0.1f * (y - pos.y);
-	pos.z = pos.z + 0.1f * (z - pos.z);
-
-	return pos;
-}
-
-/* Common::CVector3 ofApp::Spherical2Cartesians(float azimuth, float elevation, float radius) {
-
-	float x = radius * cos(azimuth) * cos(elevation);
-	float y = radius * sin(azimuth) * cos(elevation);
-	float z = radius * sin(elevation);
-
-	Common::CVector3 pos = listener->GetListenerTransform().GetPosition();
-
-	pos.x = pos.x + x;
-	pos.y = pos.y + y;
-	pos.z = 0.0f;
-
-	return pos;
-}*/
 
 void ofApp::ShowSource2Position() {
 
