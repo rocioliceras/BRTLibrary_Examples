@@ -282,15 +282,19 @@ void ofApp::mouseDragged(int x, int y, int button) {
 		if (!(dx == 0 && dy == 0)) {
 			angleRad = atan2(dy, dx);
 		} else {
-			angleRad = atan2(dy + 0.01, dx + 0.01);
+			angleRad = atan2(dy + 0.01f, dx + 0.01f);
 		}
 
 		float angleDeg = ofRadToDeg(angleRad);
 
-		if (angleDeg > 90) {
-			angleDeg = 180 - angleDeg;
-		} else if (angleDeg < -90) {
-			angleDeg = -180 - angleDeg;
+		if (angleDeg < 0.0f) angleDeg += 360.0f;
+
+		// Ajuste para evitar coseno cero exacto en 90° y 270°
+		float safeDeg = fmod(angleDeg, 360.0f);
+		if (abs(safeDeg - 90.0f) < 0.01f) {
+			angleDeg = 89.99f;
+		} else if (abs(safeDeg - 270.0f) < 0.01f) {
+			angleDeg = 270.01f;
 		}
 
 		if (dragging == ELEVATION_VOICE) {
@@ -303,7 +307,7 @@ void ofApp::mouseDragged(int x, int y, int button) {
 	default:
 		break;
 	}
-}
+	}
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button) {
@@ -550,7 +554,41 @@ char ofApp::ShowConfigurationMenu() {
 	return option;
 }
 
+// Función para interpolar entre dos valores de ángulos de manera suave
+float interpolateAngle(float prevAngle, float currentAngle, float alpha) {
+	float diff = currentAngle - prevAngle;
+	if (diff > 180.0f)
+		diff -= 360.0f; // Ajuste para el rango [-180, 180]
+	else if (diff < -180.0f)
+		diff += 360.0f;
+	return prevAngle + alpha * diff;
+}
+
 Common::CVector3 ofApp::Spherical2Cartesians(float azimuth, float elevation, float radius) {
+	// Aplicar suavizado en la elevación utilizando interpolación
+	float alpha = 0.1f;
+	elevation1 = interpolateAngle(prevElevation, elevation, alpha);
+	prevElevation = elevation; 
+
+	// Verificar que la elevación no salga de los límites -90 a 90
+	elevation = std::max(-89.9f, std::min(89.9f, elevation));
+
+	
+	float x = radius * cos(azimuth) * cos(elevation);
+	float y = radius * sin(azimuth) * cos(elevation);
+	float z = radius * sin(elevation);
+
+	Common::CVector3 pos = listener->GetListenerTransform().GetPosition();
+
+	// Interpolación suave entre la posición actual y la nueva
+	pos.x = pos.x + 0.1f * (x - pos.x);
+	pos.y = pos.y + 0.1f * (y - pos.y);
+	pos.z = pos.z + 0.1f * (z - pos.z);
+
+	return pos;
+}
+
+/* Common::CVector3 ofApp::Spherical2Cartesians(float azimuth, float elevation, float radius) {
 
 	float x = radius * cos(azimuth) * cos(elevation);
 	float y = radius * sin(azimuth) * cos(elevation);
@@ -563,7 +601,7 @@ Common::CVector3 ofApp::Spherical2Cartesians(float azimuth, float elevation, flo
 	pos.z = 0.0f;
 
 	return pos;
-}
+}*/
 
 void ofApp::ShowSource2Position() {
 

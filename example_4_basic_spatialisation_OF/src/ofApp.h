@@ -95,6 +95,8 @@ float elevation2 = 0.0f;
 float distance1 = 2.0f;
 float distance2 = 2.0f;
 
+float prevElevation = 0.0f;
+
 enum DraggedPoint {
 	NONE,
 	AZIMUTH_VOICE,
