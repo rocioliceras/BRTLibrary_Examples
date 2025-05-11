@@ -198,11 +198,12 @@ void ofApp::update() {
 void ofApp::draw() {
 	ofBackground(255);
 
+	// Dibuja las imágenes de azimuth y elevación
 	AzimuthImage.draw(0, 0);
 	ElevationImage.draw(AzimuthImage.getWidth(), 0);
 
-
 	int iconSize = 60;
+
 	// Azimuth - voice
 	VoiceImage.draw(azimuthX - iconSize / 2, azimuthY - iconSize / 2, iconSize, iconSize);
 
@@ -210,14 +211,14 @@ void ofApp::draw() {
 	StepsImage.draw(azimuthX2 - iconSize / 2, azimuthY2 - iconSize / 2, iconSize, iconSize);
 
 	// Elevation - voice
-	VoiceImage.draw(AzimuthImage.getWidth() + elevationX - iconSize / 2,
-		elevationY - iconSize / 2, iconSize, iconSize);
+	VoiceImage.draw(AzimuthImage.getWidth() + elevationX,
+		ElevationImage.getHeight() - elevationY - iconSize / 2, iconSize, iconSize);
 
 	// Elevation - steps
-	StepsImage.draw(AzimuthImage.getWidth() + elevationX2 - iconSize / 2,
-	elevationY2 - iconSize / 2, iconSize, iconSize);
-
+	StepsImage.draw(AzimuthImage.getWidth() + elevationX2,
+		ElevationImage.getHeight() - elevationY2 - iconSize / 2, iconSize, iconSize);
 }
+
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
@@ -234,117 +235,173 @@ void ofApp::mouseMoved(int x, int y) {
 }
 
 //--------------------------------------------------------------
+void calcular_azimuth(int x, int y) {
+	float centerX = AzimuthImage.getWidth() / 2.0f;
+	float centerY = AzimuthImage.getHeight() / 2.0f;
+
+	float dx = x - centerX;
+	float dy = centerY - y;
+
+	float angleRad = atan2(dy, dx);
+	float angleDeg = ofRadToDeg(angleRad) - 90.0f;
+
+	if (angleDeg < 0) angleDeg += 360.0f;
+	if (angleDeg >= 360.0f) angleDeg -= 360.0f;
+
+	if (dragging == AZIMUTH_VOICE || dragging == ELEVATION_VOICE) {
+		azimuthX = x;
+		azimuthY = y;
+		azimuth1 = ofDegToRad(angleDeg);
+	} else if (dragging == AZIMUTH_STEPS || dragging == ELEVATION_STEPS) {
+		azimuthX2 = x;
+		azimuthY2 = y;
+		azimuth2 = ofDegToRad(angleDeg);
+	}
+}
+
+
+void calcular_elevacion(int x, int y) {
+	// Convertir coordenadas globales del mouse a locales de ElevationImage
+	int localX = x - AzimuthImage.getWidth();
+	int localY = y;
+
+	float centerX = ElevationImage.getWidth() / 2.0f;
+	float centerY = ElevationImage.getHeight() / 2.0f;
+
+	float dx = localX - centerX;
+	float dy = centerY - localY; // Invertimos Y: hacia arriba es positivo
+
+	if (dx == 0 && dy == 0) dx = 0.01f;
+
+	float angleRad = atan2(dy, dx);
+	float angleDeg = ofRadToDeg(angleRad);
+
+	// Aquí es donde hacemos la diferencia:
+	// En lugar de mapear todo de 0 a 360°, dejamos los valores negativos.
+	// Resultado:
+	//   Derecha → 0°
+	//   Arriba  → +90°
+	//   Abajo   → -90°
+	//   Izquierda → ±180°
+
+	if (dragging == AZIMUTH_VOICE || dragging == ELEVATION_VOICE) {
+		elevationX = localX;
+		elevationY = ElevationImage.getHeight() - localY;
+		elevation1 = ofDegToRad(angleDeg);
+	} else if (dragging == AZIMUTH_STEPS || dragging == ELEVATION_STEPS) {
+		elevationX2 = localX;
+		elevationY2 = ElevationImage.getHeight() - localY;
+		elevation2 = ofDegToRad(angleDeg);
+	}
+
+	// Debug
+	std::cout << "Ángulo elevación: " << angleDeg << "°" << std::endl;
+}
+
+
 void ofApp::mouseDragged(int x, int y, int button) {
 	switch (dragging) {
-	case AZIMUTH_VOICE:
+	case AZIMUTH_VOICE: {
+		// 1. Actualizamos la posición en Azimuth
+		azimuthX = x;
+		azimuthY = y;
+
+		// 2. Recalculamos la posición en Azimuth
+		calcular_azimuth(azimuthX, azimuthY);
+
+		// 3. Recalculamos la posición compartida en Elevación
+		// Elevación es calculada en función de azimuthY
+		elevationX = AzimuthImage.getHeight() - azimuthY;
+		calcular_elevacion(AzimuthImage.getWidth() + elevationX, ElevationImage.getHeight() - elevationY);
+
+		break;
+	}
+
+	case ELEVATION_VOICE: {
+		// 1. Actualizamos la posición en Elevación
+		elevationX = x - AzimuthImage.getWidth();
+		elevationY = ElevationImage.getHeight() - y;
+
+		// 2. Recalculamos la posición en Elevación
+		calcular_elevacion(AzimuthImage.getWidth() + elevationX, ElevationImage.getHeight() - elevationY);
+
+		// 3. Recalculamos la posición compartida en Azimuth
+		// Azimuth es calculado en función de elevationX
+		azimuthY = AzimuthImage.getHeight() - elevationX;
+		calcular_azimuth(azimuthX, azimuthY);
+
+		break;
+	}
+
 	case AZIMUTH_STEPS: {
-		float & ax = (dragging == AZIMUTH_VOICE) ? azimuthX : azimuthX2;
-		float & ay = (dragging == AZIMUTH_VOICE) ? azimuthY : azimuthY2;
-		ax = x;
-		ay = y;
+		// 1. Actualizamos la posición de los pasos en Azimuth
+		azimuthX2 = x;
+		azimuthY2 = y;
 
-		// Conectamos el eje Y de azimuth con el eje X de elevación
-		elevationX = ay;
+		// 2. Recalculamos la posición de los pasos en Azimuth
+		calcular_azimuth(azimuthX2, azimuthY2);
 
-		float centerX = AzimuthImage.getWidth() / 2.0;
-		float centerY = AzimuthImage.getHeight() / 2.0;
+		// 3. Recalculamos la posición compartida en Elevación
+		elevationX2 = AzimuthImage.getHeight() - azimuthY2;
+		calcular_elevacion(AzimuthImage.getWidth() + elevationX2, ElevationImage.getHeight() - elevationY2);
 
-		float dx = ax - centerX;
-		float dy = centerY - ay;
-
-		float angleRad = atan2(dy, dx);
-		float angleDeg = ofRadToDeg(angleRad);
-
-		angleDeg -= 90;
-		if (angleDeg < 0) angleDeg += 360;
-		if (angleDeg >= 360) angleDeg -= 360;
-
-		if (dragging == AZIMUTH_VOICE) {
-			azimuth1 = ofDegToRad(angleDeg);
-		} else {
-			azimuth2 = ofDegToRad(angleDeg);
-		}
-
-		std::cout << "Azimut: " << angleDeg << " grados" << std::endl;
 		break;
 	}
 
-	case ELEVATION_VOICE:
 	case ELEVATION_STEPS: {
-		float & ax = (dragging == ELEVATION_VOICE) ? elevationX : elevationX2;
-		float & az = (dragging == ELEVATION_VOICE) ? elevationY : elevationY2;
-		ax = x - AzimuthImage.getWidth();
-		az = y;
+		// 1. Actualizamos la posición de los pasos en Elevación
+		elevationX2 = x - AzimuthImage.getWidth();
+		elevationY2 = ElevationImage.getHeight() - y;
 
-		// Conectamos el eje X de elevación con el eje Y de azimuth
-		azimuthY = ax;
+		// 2. Recalculamos la posición de los pasos en Elevación
+		calcular_elevacion(AzimuthImage.getWidth() + elevationX2, ElevationImage.getHeight() - elevationY2);
 
-		float centerX = ElevationImage.getWidth() / 2.0;
-		float centerY = ElevationImage.getHeight() / 2.0;
+		// 3. Recalculamos la posición compartida en Azimuth
+		azimuthY2 = AzimuthImage.getHeight() - elevationX2;
+		calcular_azimuth(azimuthX2, azimuthY2);
 
-		float dx = ax - centerX;
-		float dy = centerY - az;
-
-		float angleRad = 0.0f;
-		if (!(dx == 0 && dy == 0)) {
-			angleRad = atan2(dy, dx);
-		} else {
-			angleRad = atan2(dy + 0.01f, dx + 0.01f);
-		}
-
-		float angleDeg = ofRadToDeg(angleRad);
-
-		if (angleDeg < 0.0f) angleDeg += 360.0f;
-
-		// Ajuste para evitar coseno cero exacto en 90° y 270°
-		float safeDeg = fmod(angleDeg, 360.0f);
-		if (abs(safeDeg - 90.0f) < 0.01f) {
-			angleDeg = 89.99f;
-		} else if (abs(safeDeg - 270.0f) < 0.01f) {
-			angleDeg = 270.01f;
-		}
-
-		if (dragging == ELEVATION_VOICE) {
-			elevation1 = ofDegToRad(angleDeg);
-		} else {
-			elevation2 = ofDegToRad(angleDeg);
-		}
 		break;
 	}
-
-	default:
-		break;
 	}
+}
 
-	}
+
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button) {
-	float minDistance = 20.0f; // radio de detección
+	float minDistance = 20.0f; // Radio de detección de los íconos
 
 	ofVec2f mouse(x, y);
-	ofVec2f azRed(azimuthX, azimuthY);
-	ofVec2f azBlue(azimuthX2, azimuthY2);
-	ofVec2f elRed(AzimuthImage.getWidth() + elevationX, elevationY);
-	ofVec2f elBlue(AzimuthImage.getWidth() + elevationX2, elevationY2);
+	ofVec2f azVoice(azimuthX, azimuthY);
+	ofVec2f azSteps(azimuthX2, azimuthY2);
 
-	if (mouse.distance(azRed) < minDistance) {
-		dragging = AZIMUTH_VOICE;
-	} else if (mouse.distance(azBlue) < minDistance) {
-		dragging = AZIMUTH_STEPS;
-	} else if (mouse.distance(elRed) < minDistance) {
+	// Coordenadas de los íconos de elevación
+	ofVec2f elVoice(AzimuthImage.getWidth() + elevationX, ElevationImage.getHeight() - elevationY);
+	ofVec2f elSteps(AzimuthImage.getWidth() + elevationX2, ElevationImage.getHeight() - elevationY2);
+
+	// Verifica si el clic está dentro del área de la fuente en la elevación
+	if (mouse.distance(elVoice) < minDistance) {
 		dragging = ELEVATION_VOICE;
-	} else if (mouse.distance(elBlue) < minDistance) {
+		std::cout << "Clic en voz elevación" << std::endl;
+	} else if (mouse.distance(elSteps) < minDistance) {
 		dragging = ELEVATION_STEPS;
+		std::cout << "Clic en pasos elevación" << std::endl;
+	} else if (mouse.distance(azVoice) < minDistance) {
+		dragging = AZIMUTH_VOICE;
+		std::cout << "Clic en voz azimuth" << std::endl;
+	} else if (mouse.distance(azSteps) < minDistance) {
+		dragging = AZIMUTH_STEPS;
+		std::cout << "Clic en pasos azimuth" << std::endl;
 	} else {
 		dragging = NONE;
 	}
 }
 
-//--------------------------------------------------------------
+
 void ofApp::mouseReleased(int x, int y, int button) {
-	dragging = NONE;
+	dragging = NONE; // Cuando se suelta el ratón, dejamos de arrastrar
 }
+
 
 //--------------------------------------------------------------
 void ofApp::mouseEntered(int x, int y) {

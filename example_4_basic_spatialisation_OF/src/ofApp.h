@@ -27,8 +27,8 @@
 
 #define SAMPLERATE 44100
 
-#define SOURCE1_FILEPATH "../resources/speech.wav"
-#define SOURCE2_FILEPATH "../resources/steps.wav"
+#define SOURCE1_FILEPATH "resources/speech.wav"
+#define SOURCE2_FILEPATH "resources/steps.wav"
 #define HRTFRESAMPLINGSTEP 15
 
 #define SOURCE1_INITIAL_AZIMUTH 90
@@ -107,7 +107,10 @@ enum DraggedPoint {
 
 DraggedPoint dragging = NONE;
 
-
+float x_elev_voice = 0.0;
+float x_elev_steps = 0.0;
+float y_azim_voice = 0.0;
+float y_azim_steps = 0.0;
 
 class ofApp : public ofBaseApp {
 
