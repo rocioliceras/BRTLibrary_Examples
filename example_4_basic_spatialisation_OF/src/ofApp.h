@@ -27,8 +27,8 @@
 
 #define SAMPLERATE 44100
 
-#define SOURCE1_FILEPATH "resources/speech.wav"
-#define SOURCE2_FILEPATH "resources/steps.wav"
+#define SOURCE1_FILEPATH "../resources/speech.wav"
+#define SOURCE2_FILEPATH "../resources/steps.wav"
 #define HRTFRESAMPLINGSTEP 15
 
 #define SOURCE1_INITIAL_AZIMUTH 90

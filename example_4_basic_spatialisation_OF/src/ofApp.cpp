@@ -198,24 +198,23 @@ void ofApp::update() {
 void ofApp::draw() {
 	ofBackground(255);
 
-	// Dibuja las imágenes de azimuth y elevación
 	AzimuthImage.draw(0, 0);
 	ElevationImage.draw(AzimuthImage.getWidth(), 0);
 
 	int iconSize = 60;
 
-	// Azimuth - voice
+	// Voice - Azimuth
 	VoiceImage.draw(azimuthX - iconSize / 2, azimuthY - iconSize / 2, iconSize, iconSize);
 
-	// Azimuth - steps
+	// Steps - Azimuth
 	StepsImage.draw(azimuthX2 - iconSize / 2, azimuthY2 - iconSize / 2, iconSize, iconSize);
 
-	// Elevation - voice
-	VoiceImage.draw(AzimuthImage.getWidth() + elevationX,
+	// Voice - Elevation
+	VoiceImage.draw(AzimuthImage.getWidth() + elevationX - iconSize / 2,
 		ElevationImage.getHeight() - elevationY - iconSize / 2, iconSize, iconSize);
 
-	// Elevation - steps
-	StepsImage.draw(AzimuthImage.getWidth() + elevationX2,
+	// Steps - Elevation
+	StepsImage.draw(AzimuthImage.getWidth() + elevationX2 - iconSize / 2,
 		ElevationImage.getHeight() - elevationY2 - iconSize / 2, iconSize, iconSize);
 }
 
@@ -369,33 +368,32 @@ void ofApp::mouseDragged(int x, int y, int button) {
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button) {
-	float minDistance = 20.0f; // Radio de detección de los íconos
+	float minDistance = 20.0f;
+	int iconSize = 60;
 
 	ofVec2f mouse(x, y);
+
 	ofVec2f azVoice(azimuthX, azimuthY);
 	ofVec2f azSteps(azimuthX2, azimuthY2);
 
-	// Coordenadas de los íconos de elevación
-	ofVec2f elVoice(AzimuthImage.getWidth() + elevationX, ElevationImage.getHeight() - elevationY);
-	ofVec2f elSteps(AzimuthImage.getWidth() + elevationX2, ElevationImage.getHeight() - elevationY2);
+	ofVec2f elVoice(AzimuthImage.getWidth() + elevationX,
+		ElevationImage.getHeight() - elevationY);
+	ofVec2f elSteps(AzimuthImage.getWidth() + elevationX2,
+		ElevationImage.getHeight() - elevationY2);
 
-	// Verifica si el clic está dentro del área de la fuente en la elevación
 	if (mouse.distance(elVoice) < minDistance) {
 		dragging = ELEVATION_VOICE;
-		std::cout << "Clic en voz elevación" << std::endl;
 	} else if (mouse.distance(elSteps) < minDistance) {
 		dragging = ELEVATION_STEPS;
-		std::cout << "Clic en pasos elevación" << std::endl;
 	} else if (mouse.distance(azVoice) < minDistance) {
 		dragging = AZIMUTH_VOICE;
-		std::cout << "Clic en voz azimuth" << std::endl;
 	} else if (mouse.distance(azSteps) < minDistance) {
 		dragging = AZIMUTH_STEPS;
-		std::cout << "Clic en pasos azimuth" << std::endl;
 	} else {
 		dragging = NONE;
 	}
 }
+
 
 
 void ofApp::mouseReleased(int x, int y, int button) {
