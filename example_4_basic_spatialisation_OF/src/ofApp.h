@@ -106,6 +106,7 @@ enum DraggedPoint {
 };
 
 DraggedPoint dragging = NONE;
+DraggedPoint prevDragging;
 
 float x_elev_voice = 0.0;
 float x_elev_steps = 0.0;
