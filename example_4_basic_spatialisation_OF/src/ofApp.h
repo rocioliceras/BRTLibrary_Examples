@@ -27,8 +27,8 @@
 
 #define SAMPLERATE 44100
 
-#define SOURCE1_FILEPATH "../resources/speech.wav"
-#define SOURCE2_FILEPATH "../resources/steps.wav"
+#define SOURCE1_FILEPATH "resources/speech.wav"
+#define SOURCE2_FILEPATH "resources/steps.wav"
 #define HRTFRESAMPLINGSTEP 15
 
 #define SOURCE1_INITIAL_AZIMUTH 90
@@ -73,10 +73,11 @@ ofImage AzimuthImage;
 ofImage ElevationImage;
 ofImage VoiceImage;
 ofImage StepsImage;
+ofImage AxisImage;
 ofVec2f center, dragPoint;
 ofVec2f elevationPoint;
 bool isDragging = false;
-float azimuthX, azimuthY, azimuthX2, azimuthY2;
+float azimuthX, azimuthY, azimuthX2, azimuthY2,axisX,axisY;
 float elevationX, elevationY, elevationX2, elevationY2;
 
 Common::CEarPair<CMonoBuffer<float>> outputBufferStereo; // Stereo buffer containing processed audio
@@ -94,6 +95,10 @@ float elevation1 = 0.0f;
 float elevation2 = 0.0f;
 float distance1 = 2.0f;
 float distance2 = 2.0f;
+
+float x_AXIS = 0.0;
+float y_AXIS = 0.0;
+float z_AXIS = 0.0;
 
 float prevElevation = 0.0f;
 

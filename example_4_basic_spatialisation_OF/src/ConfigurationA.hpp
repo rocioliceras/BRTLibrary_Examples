@@ -9,7 +9,7 @@
 
 #define LISTENER_HRTF_MODEL_ID "listenerHRTF1"
 
-#define SOFA1_FILEPATH "../resources/hrtf.sofa"
+#define SOFA1_FILEPATH "resources/hrtf.sofa"
 
 #define ILD_NearFieldEffect_44100 "resources/NearFieldCompensation_ILD_44100.sofa"
 #define ILD_NearFieldEffect_48000 "resources/NearFieldCompensation_ILD_48000.sofa"
