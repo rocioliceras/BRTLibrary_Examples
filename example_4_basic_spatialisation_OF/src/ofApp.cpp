@@ -115,11 +115,10 @@ void ofApp::setup() {
 	// /////////////////////
 	// Load Images
 	/////////////////////
-
-	AzimuthImage.load("azimuth.jpg");
-	ElevationImage.load("elevation.jpg");
-	VoiceImage.load("voice.png");
-	StepsImage.load("steps.png");
+	AzimuthImage.load("azimuth_head.png");
+	ElevationImage.load("elevation_head.png");
+	VoiceImage.load("voice2.png");
+	StepsImage.load("steps2.png");
 	AxisImage.load("axis_head.png");
 
 	if (!AxisImage.isAllocated()) {
@@ -128,24 +127,23 @@ void ofApp::setup() {
 		std::cout << "Imagen cargada correctamente: "
 				  << AxisImage.getWidth() << "x" << AxisImage.getHeight() << std::endl;
 	}
-	ofSetWindowShape(AzimuthImage.getWidth()+ElevationImage.getWidth(), AzimuthImage.getHeight());
+	ofSetWindowShape(2*Width,Height);
 
-	center.set(AzimuthImage.getWidth() / 2, AzimuthImage.getHeight() / 2);
-	dragPoint.set(center); 
-	elevationPoint.set(AzimuthImage.getWidth() + ElevationImage.getWidth() / 2, AzimuthImage.getHeight() / 2);
+	center.set(Width / 2, Height / 2);
+	dragPoint.set(center);
+	elevationPoint.set(Width + Width / 2, Height / 2);
 
-	azimuthX = AzimuthImage.getWidth() / 2.0;
-	azimuthY = AzimuthImage.getHeight() / 2.0;
+	azimuthX = Width / 2.0;
+	azimuthY = Height / 2.0;
 
-	azimuthX2 = AzimuthImage.getWidth() / 2.0;
-	azimuthY2 = AzimuthImage.getHeight() / 2.0;
+	azimuthX2 = Width/ 2.0;
+	azimuthY2 = Height / 2.0;
 
+	elevationX = Width/ 2.0;
+	elevationY = Height / 2.0;
 
-	elevationX = ElevationImage.getWidth() / 2.0;
-	elevationY = ElevationImage.getHeight() / 2.0;
-
-	elevationX2 = ElevationImage.getWidth() / 2.0;
-	elevationY2 = ElevationImage.getHeight() / 2.0;
+	elevationX2 = Width / 2.0;
+	elevationY2 = Height / 2.0;
 
 	axisX = (ofGetWidth() - AxisImage.getWidth()) / 2;
 	axisY = 0;
@@ -208,32 +206,59 @@ void drawDashedLine(ofPoint a, ofPoint b, float dashLength = 5, float gapLength 
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-	ofBackground(255);
+	ofBackground(200, 200, 200); // Fondo gris claro
 
-	// Dibujar imágenes base
-	AzimuthImage.draw(0, 0);
-	ElevationImage.draw(AzimuthImage.getWidth(), 0);
 	AxisImage.draw(axisX, axisY);
 
 	int iconSize = 60;
 
-	// Voice - Azimuth
-	VoiceImage.draw(azimuthX - iconSize / 2, azimuthY - iconSize / 2, iconSize, iconSize);
-	// Steps - Azimuth
-	StepsImage.draw(azimuthX2 - iconSize / 2, azimuthY2 - iconSize / 2, iconSize, iconSize);
+	// Parámetro de animación basado en tiempo
+	float scaleAnim = 1.0 + 0.1 * sin(ofGetElapsedTimef() * 3.0);
+	float scaleAnimInv = 1.0 + 0.1 * sin(ofGetElapsedTimef() * 3.0 + PI);
 
-	// Voice - Elevation
-	VoiceImage.draw(AzimuthImage.getWidth() + elevationX - iconSize / 2,
-		ElevationImage.getHeight() - elevationY - iconSize / 2, iconSize, iconSize);
-	// Steps - Elevation
-	StepsImage.draw(AzimuthImage.getWidth() + elevationX2 - iconSize / 2,
-		ElevationImage.getHeight() - elevationY2 - iconSize / 2, iconSize, iconSize);
+	// --- Centros ---
+	float azimuthCenterX = Width / 2.0f;
+	float azimuthCenterY = Height / 2.0f;
+	float elevationCenterX = Width + Width / 2.0f;
+	float elevationCenterY = Height / 2.0f;
 
-	
+	// --- Ejes y etiquetas ---
+	float lineHalfLength = 220;
+	ofSetColor(255);
+	ofSetLineWidth(2);
+
+	// Azimuth
+	ofDrawLine(azimuthCenterX, azimuthCenterY - lineHalfLength, azimuthCenterX, azimuthCenterY + lineHalfLength); // Y
+	ofDrawLine(azimuthCenterX - lineHalfLength, azimuthCenterY, azimuthCenterX + lineHalfLength, azimuthCenterY); // X
+	ofDrawBitmapStringHighlight("+X", azimuthCenterX - 8, azimuthCenterY - lineHalfLength - 15);
+	ofDrawBitmapStringHighlight("-X", azimuthCenterX - 8, azimuthCenterY + lineHalfLength + 5);
+	ofDrawBitmapStringHighlight("-Y", azimuthCenterX + lineHalfLength + 8, azimuthCenterY + 4);
+	ofDrawBitmapStringHighlight("+Y", azimuthCenterX - lineHalfLength - 28, azimuthCenterY + 4);
+
+	// Elevation
+	ofDrawLine(elevationCenterX, elevationCenterY - lineHalfLength, elevationCenterX, elevationCenterY + lineHalfLength); // Z
+	ofDrawLine(elevationCenterX - lineHalfLength, elevationCenterY, elevationCenterX + lineHalfLength, elevationCenterY); // X
+	ofDrawBitmapStringHighlight("+Z", elevationCenterX - 8, elevationCenterY - lineHalfLength - 15);
+	ofDrawBitmapStringHighlight("-Z", elevationCenterX - 8, elevationCenterY + lineHalfLength + 5);
+	ofDrawBitmapStringHighlight("+X", elevationCenterX + lineHalfLength + 8, elevationCenterY + 4);
+	ofDrawBitmapStringHighlight("-X", elevationCenterX - lineHalfLength - 28, elevationCenterY + 4);
+
+	ofSetLineWidth(1);
+
+	// --- Cabezas (debajo de los iconos) ---
+	float headScale = 0.25f;
+	float azimuthW = AzimuthImage.getWidth() * headScale;
+	float azimuthH = AzimuthImage.getHeight() * headScale;
+	AzimuthImage.draw(azimuthCenterX - azimuthW / 2, azimuthCenterY - azimuthH / 2, azimuthW, azimuthH);
+
+	float elevationW = ElevationImage.getWidth() * headScale;
+	float elevationH = ElevationImage.getHeight() * headScale;
+	ElevationImage.draw(elevationCenterX - elevationW / 2, elevationCenterY - elevationH / 2, elevationW, elevationH);
+
+	// --- Dibujo 3D proyectado ---
 	ofPoint coordCenter = ofPoint(axisX + AxisImage.getWidth() / 2, axisY + AxisImage.getHeight() * 0.65);
-	float scale = 0.8f;
+	float scale = 0.55f;
 
-	
 	ofPoint Px = project3DTo2D(x_AXIS, 0, 0, coordCenter, scale);
 	ofPoint Py = project3DTo2D(0, y_AXIS, 0, coordCenter, scale);
 	ofPoint Pz = project3DTo2D(0, 0, z_AXIS, coordCenter, scale);
@@ -241,28 +266,41 @@ void ofApp::draw() {
 	ofPoint Pxy = project3DTo2D(x_AXIS, y_AXIS, 0, coordCenter, scale);
 	ofPoint Pxz = project3DTo2D(x_AXIS, 0, z_AXIS, coordCenter, scale);
 	ofPoint Pyz = project3DTo2D(0, y_AXIS, z_AXIS, coordCenter, scale);
-
-	ofPoint Pxyz = project3DTo2D(x_AXIS, y_AXIS, z_AXIS, coordCenter, scale); // Final
+	ofPoint Pxyz = project3DTo2D(x_AXIS, y_AXIS, z_AXIS, coordCenter, scale);
 
 	ofSetColor(255, 0, 0);
 	ofDrawCircle(Pxyz, 6);
 
-	ofSetColor(0);
-	drawDashedLine(Px, Pxy); // x -> xy
-	drawDashedLine(Pxy, Pxyz); // xy -> xyz
-	drawDashedLine(Px, Pxz); // x -> xz
-	drawDashedLine(Pxz, Pxyz); // xz -> xyz
+	ofSetColor(255);
+	drawDashedLine(Px, Pxy);
+	drawDashedLine(Pxy, Pxyz);
+	drawDashedLine(Px, Pxz);
+	drawDashedLine(Pxz, Pxyz);
 
-	drawDashedLine(Py, Pxy); // y -> xy
-	drawDashedLine(Py, Pyz); // y -> yz
-	drawDashedLine(Pyz, Pxyz); // yz -> xyz
+	drawDashedLine(Py, Pxy);
+	drawDashedLine(Py, Pyz);
+	drawDashedLine(Pyz, Pxyz);
 
-	drawDashedLine(Pz, Pxz); // z -> xz
-	drawDashedLine(Pz, Pyz); // z -> yz
+	drawDashedLine(Pz, Pxz);
+	drawDashedLine(Pz, Pyz);
 
-	ofSetColor(255); 
+	// --- Voice y Steps (encima de las cabezas) ---
+	float azVoiceSize = iconSize * scaleAnim;
+	VoiceImage.draw(azimuthX - azVoiceSize / 2, azimuthY - azVoiceSize / 2, azVoiceSize, azVoiceSize);
+
+	float azStepsSize = iconSize * scaleAnimInv;
+	StepsImage.draw(azimuthX2 - azStepsSize / 2, azimuthY2 - azStepsSize / 2, azStepsSize, azStepsSize);
+
+	float evVoiceSize = iconSize * scaleAnim;
+	VoiceImage.draw(Width + elevationX - evVoiceSize / 2,
+		Height - elevationY - evVoiceSize / 2, evVoiceSize, evVoiceSize);
+
+	float evStepsSize = iconSize * scaleAnimInv;
+	StepsImage.draw(Width + elevationX2 - evStepsSize / 2,
+		Height - elevationY2 - evStepsSize / 2, evStepsSize, evStepsSize);
+
+	ofSetColor(255); // reset
 }
-
 
 
 
@@ -282,8 +320,8 @@ void ofApp::mouseMoved(int x, int y) {
 
 //--------------------------------------------------------------
 void calcular_azimuth(int x, int y) {
-	float centerX = AzimuthImage.getWidth() / 2.0f;
-	float centerY = AzimuthImage.getHeight() / 2.0f;
+	float centerX = Width / 2.0f;
+	float centerY = Height / 2.0f;
 
 	float dx = x - centerX;
 	float dy = centerY - y;
@@ -310,11 +348,11 @@ void calcular_azimuth(int x, int y) {
 
 void calcular_elevacion(int x, int y) {
 	
-	int localX = x - AzimuthImage.getWidth(); 
+	int localX = x - Width; 
 	int localY = y;
 
-	float centerX = ElevationImage.getWidth() / 2.0f; 
-	float centerY = ElevationImage.getHeight() / 2.0f; 
+	float centerX = Width / 2.0f; 
+	float centerY = Height / 2.0f; 
 
 	float dx = localX - centerX; 
 	float dy = centerY - localY;
@@ -336,13 +374,13 @@ void calcular_elevacion(int x, int y) {
 
 	if (dragging == AZIMUTH_VOICE || dragging == ELEVATION_VOICE) {
 		elevationX = localX;
-		elevationY = ElevationImage.getHeight() - localY; 
+		elevationY = Height - localY; 
 		elevation1 = ofDegToRad(angleDeg);
 		x_AXIS = -dx;
 		z_AXIS = dy;
 	} else if (dragging == AZIMUTH_STEPS || dragging == ELEVATION_STEPS) {
 		elevationX2 = localX;
-		elevationY2 = ElevationImage.getHeight() - localY;
+		elevationY2 = Height - localY;
 		elevation2 = ofDegToRad(angleDeg);
 	}
 }
@@ -357,23 +395,23 @@ void ofApp::mouseDragged(int x, int y, int button) {
 
 		calcular_azimuth(azimuthX, azimuthY);
 
-		elevationX = AzimuthImage.getHeight() - azimuthY;
+		elevationX = Height - azimuthY;
 
 		prevDragging = dragging;
 		dragging = ELEVATION_VOICE;
-		calcular_elevacion(AzimuthImage.getWidth() + elevationX, ElevationImage.getHeight() - elevationY);
+		calcular_elevacion(Width + elevationX, Height - elevationY);
 		dragging = prevDragging;
 
 		break;
 	}
 
 	case ELEVATION_VOICE: {
-		elevationX = x - AzimuthImage.getWidth();
-		elevationY = ElevationImage.getHeight() - y;
+		elevationX = x - Width;
+		elevationY = Height - y;
 
-		calcular_elevacion(AzimuthImage.getWidth() + elevationX, ElevationImage.getHeight() - elevationY);
+		calcular_elevacion(Width + elevationX, Height - elevationY);
 
-		azimuthY = AzimuthImage.getHeight() - elevationX;
+		azimuthY = Height - elevationX;
 
 		prevDragging = dragging;
 		dragging = AZIMUTH_VOICE;
@@ -389,23 +427,23 @@ void ofApp::mouseDragged(int x, int y, int button) {
 
 		calcular_azimuth(azimuthX2, azimuthY2);
 
-		elevationX2 = AzimuthImage.getHeight() - azimuthY2;
+		elevationX2 = Height - azimuthY2;
 
 		prevDragging = dragging;
 		dragging = ELEVATION_STEPS;
-		calcular_elevacion(AzimuthImage.getWidth() + elevationX2, ElevationImage.getHeight() - elevationY2);
+		calcular_elevacion(Width + elevationX2, Height - elevationY2);
 		dragging = prevDragging;
 
 		break;
 	}
 
 	case ELEVATION_STEPS: {
-		elevationX2 = x - AzimuthImage.getWidth();
-		elevationY2 = ElevationImage.getHeight() - y;
+		elevationX2 = x - Width;
+		elevationY2 = Height - y;
 
-		calcular_elevacion(AzimuthImage.getWidth() + elevationX2, ElevationImage.getHeight() - elevationY2);
+		calcular_elevacion(Width + elevationX2, Height - elevationY2);
 
-		azimuthY2 = AzimuthImage.getHeight() - elevationX2;
+		azimuthY2 = Height - elevationX2;
 
 		prevDragging = dragging;
 		dragging = AZIMUTH_STEPS;
@@ -431,10 +469,10 @@ void ofApp::mousePressed(int x, int y, int button) {
 	ofVec2f azVoice(azimuthX, azimuthY);
 	ofVec2f azSteps(azimuthX2, azimuthY2);
 
-	ofVec2f elVoice(AzimuthImage.getWidth() + elevationX,
-		ElevationImage.getHeight() - elevationY);
-	ofVec2f elSteps(AzimuthImage.getWidth() + elevationX2,
-		ElevationImage.getHeight() - elevationY2);
+	ofVec2f elVoice(Width + elevationX,
+		Height - elevationY);
+	ofVec2f elSteps(Width + elevationX2,
+		Height - elevationY2);
 
 	if (mouse.distance(elVoice) < minDistance) {
 		dragging = ELEVATION_VOICE;

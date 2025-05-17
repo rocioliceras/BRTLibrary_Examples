@@ -113,10 +113,8 @@ enum DraggedPoint {
 DraggedPoint dragging = NONE;
 DraggedPoint prevDragging;
 
-float x_elev_voice = 0.0;
-float x_elev_steps = 0.0;
-float y_azim_voice = 0.0;
-float y_azim_steps = 0.0;
+const int Width = 600;
+const int Height = 600;
 
 class ofApp : public ofBaseApp {
 
