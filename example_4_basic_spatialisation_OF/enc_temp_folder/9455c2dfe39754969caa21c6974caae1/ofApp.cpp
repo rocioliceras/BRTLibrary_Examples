@@ -212,17 +212,17 @@ void ofApp::draw() {
 
 	int iconSize = 60;
 
-	
+	// Parámetro de animación basado en tiempo
 	float scaleAnim = 1.0 + 0.1 * sin(ofGetElapsedTimef() * 3.0);
 	float scaleAnimInv = 1.0 + 0.1 * sin(ofGetElapsedTimef() * 3.0 + PI);
 
-	
+	// --- Centros ---
 	float azimuthCenterX = Width / 2.0f;
 	float azimuthCenterY = Height / 2.0f;
 	float elevationCenterX = Width + Width / 2.0f;
 	float elevationCenterY = Height / 2.0f;
 
-	
+	// --- Ejes y etiquetas ---
 	float lineHalfLength = 220;
 	ofSetColor(255);
 	ofSetLineWidth(2);
@@ -435,7 +435,7 @@ void ofApp::mouseDragged(int x, int y, int button) {
 		int mx = x;
 		int my = y;
 
-		// Limit elevationX
+		// Limitar elevationX
 		if (mx < elevationCenterX - lineHalfLength)
 			elevationX = elevationCenterX - lineHalfLength - Width;
 		else if (mx > elevationCenterX + lineHalfLength)
@@ -443,7 +443,7 @@ void ofApp::mouseDragged(int x, int y, int button) {
 		else
 			elevationX = mx - Width;
 
-		// Limit elevationY
+		// Limitar elevationY
 		if (my < elevationCenterY - lineHalfLength)
 			elevationY = Height - (elevationCenterY - lineHalfLength);
 		else if (my > elevationCenterY + lineHalfLength)
@@ -464,7 +464,7 @@ void ofApp::mouseDragged(int x, int y, int button) {
 	}
 
 	case AZIMUTH_STEPS: {
-		// Limit azimuthX2
+		// Limitar azimuthX2
 		if (x < azimuthCenterX - lineHalfLength)
 			azimuthX2 = azimuthCenterX - lineHalfLength;
 		else if (x > azimuthCenterX + lineHalfLength)
@@ -472,7 +472,7 @@ void ofApp::mouseDragged(int x, int y, int button) {
 		else
 			azimuthX2 = x;
 
-		// Limit azimuthY2
+		// Limitar azimuthY2
 		if (y < azimuthCenterY - lineHalfLength)
 			azimuthY2 = azimuthCenterY - lineHalfLength;
 		else if (y > azimuthCenterY + lineHalfLength)
@@ -496,7 +496,7 @@ void ofApp::mouseDragged(int x, int y, int button) {
 		int mx = x;
 		int my = y;
 
-		// Limit elevationX2
+		// Limitar elevationX2
 		if (mx < elevationCenterX - lineHalfLength)
 			elevationX2 = elevationCenterX - lineHalfLength - Width;
 		else if (mx > elevationCenterX + lineHalfLength)
@@ -504,7 +504,7 @@ void ofApp::mouseDragged(int x, int y, int button) {
 		else
 			elevationX2 = mx - Width;
 
-		// Limit elevationY2
+		// Limitar elevationY2
 		if (my < elevationCenterY - lineHalfLength)
 			elevationY2 = Height - (elevationCenterY - lineHalfLength);
 		else if (my > elevationCenterY + lineHalfLength)

@@ -76,6 +76,7 @@ ofImage StepsImage;
 ofImage AxisImage;
 ofVec2f center, dragPoint;
 ofVec2f elevationPoint;
+
 bool isDragging = false;
 float azimuthX, azimuthY, azimuthX2, azimuthY2,axisX,axisY;
 float elevationX, elevationY, elevationX2, elevationY2;
