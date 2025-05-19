@@ -25,7 +25,7 @@
 
 #define SAMPLERATE 44100
 
-#define SOURCE_FILEPATH "../resources/stereo_test.wav"
+#define SOURCE_FILEPATH "resources/stereo_test.wav"
 #define HRTFRESAMPLINGSTEP 15
 
 #define SOURCE1_INITIAL_AZIMUTH 90
